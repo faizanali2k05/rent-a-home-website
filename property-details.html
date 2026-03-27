@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Property Details - Rent a Home</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary"><div class="container"><a class="navbar-brand" href="index.html">Rent a Home</a><div id="nav-auth" class="ms-auto"></div></div></nav>
+<section class="container py-4">
+  <div id="content"></div>
+  <script type="module">
+  import { initNavbar, generateInvoice } from './js/app.js';
+  import { getPropertyById } from './js/properties.js';
+  import { getLocalUser } from './js/auth.js';
+  import { createBooking, fetchBookingsForUser } from './js/bookings.js';
+  import { fetchReviews, addReview } from './js/reviews.js';
+
+  initNavbar();
+  const params = new URLSearchParams(location.search);
+  const id = params.get('id');
+  const content = document.getElementById('content');
+
+  async function renderReviews() {
+    const list = document.getElementById('reviews-list');
+    if(!list) return;
+    try {
+      const revs = await fetchReviews(id);
+      if(!revs.length) { list.innerHTML = '<p class="small text-muted">No reviews yet.</p>'; return; }
+      list.innerHTML = revs.map(r => `
+        <div class="mb-3 border-bottom pb-3">
+          <div class="d-flex justify-content-between">
+            <span class="fw-bold small">${r.profiles?.full_name || 'Verified Resident'}</span>
+            <span class="rating-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
+          </div>
+          <div class="small text-muted mt-1">${r.comment || ''}</div>
+        </div>
+      `).join('');
+    } catch(e) { list.innerHTML = 'Error loading reviews'; }
+  }
+
+  (async ()=>{
+    if(!id){ content.innerHTML = '<div class="alert alert-danger">Missing property id</div>'; return; }
+    try{
+      const p = await getPropertyById(id);
+      if(!p) { content.innerHTML = '<div class="alert alert-warning">Property not found</div>'; return; }
+      
+      const user = getLocalUser();
+      const isOwner = user && user.id === p.owner;
+      
+      let residentBooking = null;
+      if(user && !isOwner) {
+        const myBookings = await fetchBookingsForUser(user.id);
+        residentBooking = myBookings.find(b => b.property_id === p.id && b.status === 'approved' && b.is_paid);
+      }
+
+      const mainImg = p.image_url || 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&q=80&w=1000';
+      content.innerHTML = `
+        <div class="row g-4">
+          <div class="col-md-8">
+            <div class="mb-4"><img src="${mainImg}" class="img-fluid rounded-4 shadow-sm w-100" style="height:450px; object-fit:cover"></div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div><h1 class="h3 fw-bold mb-1">${p.title}</h1><p class="text-muted mb-0">${p.city} • ${p.bedrooms} Beds • ${p.bathrooms} Baths</p></div>
+              <div class="text-end"><span class="price-badge h5 mb-0">$${p.price} <small class="fw-normal">/mo</small></span></div>
+            </div>
+            <div class="card p-4 border-0 shadow-sm mb-4">
+              <h5 class="fw-bold mb-3">Description</h5>
+              <p>${p.description || 'Premium property in a prime location.'}</p>
+              <div class="d-flex flex-wrap gap-2 mt-2">${(p.amenities||[]).map(a=>`<span class="amenity-badge">${a}</span>`).join('')}</div>
+            </div>
+            <div class="mt-5">
+              <h5 class="fw-bold mb-4">Recent Reviews</h5>
+              <div id="reviews-list">Loading reviews...</div>
+              ${(user && !isOwner) ? `
+                <div class="card p-4 mt-4 border-0 shadow-sm bg-light">
+                  <h6 class="fw-bold mb-3">Post a Review</h6>
+                  <form id="review-form">
+                    <div class="mb-3"><label class="small fw-bold text-muted mb-1">Rating</label><select id="rating" class="form-select form-select-sm w-auto"><option value="5">5 Stars</option><option value="4">4 Stars</option><option value="3">3 Stars</option><option value="2">2 Stars</option><option value="1">1 Star</option></select></div>
+                    <div class="mb-3"><textarea id="comment" class="form-control" rows="3" placeholder="Share your experience..."></textarea></div>
+                    <button class="btn btn-sm btn-primary">Submit Review</button>
+                  </form>
+                </div>` : ''}
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card p-4 border-0 shadow-sm border-0">
+              ${residentBooking ? `
+                <div class="text-center py-3">
+                  <div class="text-success mb-3"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/></svg></div>
+                  <h5 class="fw-bold">Lease Active</h5>
+                  <p class="text-muted small">You are the current resident from <strong>${residentBooking.start_date}</strong>. Lease is fully paid.</p>
+                  <button id="btn-invoice" class="btn btn-primary w-100 mt-2">Get Invoice</button>
+                </div>` : isOwner ? `
+                <div class="text-center py-4"><h5 class="fw-bold">Managed by You</h5><p class="text-muted small">Check your dashboard for booking requests.</p><a href="dashboard.html" class="btn btn-primary w-100">Go to Dashboard</a></div>` : `
+                <h5 class="fw-bold mb-4">Reserve Home</h5>
+                <div id="booking-msg"></div>
+                <form id="booking-form">
+                  <div class="mb-3"><label class="small fw-bold text-muted mb-1">Check-in</label><input type="date" id="start" class="form-control" required></div>
+                  <div class="mb-3"><label class="small fw-bold text-muted mb-1">Check-out</label><input type="date" id="end" class="form-control" required></div>
+                  <div class="mb-3"><textarea id="message" class="form-control" rows="3" placeholder="Additional query..."></textarea></div>
+                  <button class="btn btn-primary w-100 py-2">Request Visit</button>
+                </form>`}
+            </div>
+          </div>
+        </div>
+      `;
+      
+      await renderReviews();
+      if(residentBooking) document.getElementById('btn-invoice').onclick = () => generateInvoice(residentBooking, p);
+      
+      if(document.getElementById('review-form')){
+        document.getElementById('review-form').addEventListener('submit', async (ev)=>{
+          ev.preventDefault();
+          const rating = parseInt(document.getElementById('rating').value);
+          const comment = document.getElementById('comment').value;
+          try{ await addReview({ property_id: id, tenant_id: user.id, rating, comment }); await renderReviews(); document.getElementById('review-form').reset(); } catch(e){ alert(e.message); }
+        });
+      }
+
+      if(!isOwner && document.getElementById('booking-form')){
+        document.getElementById('booking-form').addEventListener('submit', async (e)=>{
+          e.preventDefault();
+          if(!user){ window.location.href = 'login.html'; return; }
+          const start = document.getElementById('start').value;
+          const end = document.getElementById('end').value;
+          const message = document.getElementById('message').value;
+          try{
+            await createBooking({ property_id: p.id, tenant_id: user.id, start_date: start, end_date: end, message });
+            document.getElementById('booking-msg').innerHTML = '<div class="alert alert-success mt-2">Request Sent!</div>';
+          }catch(err){ document.getElementById('booking-msg').innerHTML = `<div class="alert alert-danger mt-2">${err.message}</div>`; }
+        });
+      }
+    }catch(err){ content.innerHTML = `<div class="alert alert-danger">${err.message}</div>`; }
+  })();
+  </script>
+</body>
+</html>

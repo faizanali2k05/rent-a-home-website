@@ -1,0 +1,106 @@
+/* Premium Modern Styles for Rent a Home */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --bg: #f8fafc;
+  --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --card-shadow-hover: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+body {
+  background-color: var(--bg);
+  color: #1e293b;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
+}
+
+.navbar {
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  padding: 0.8rem 0;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.navbar-brand { font-weight: 800; font-size: 1.4rem; letter-spacing: -0.5px; }
+
+.hero {
+  background: white;
+  border-radius: 20px;
+  padding: 3rem;
+  box-shadow: var(--card-shadow);
+  border: 1px solid #f1f5f9;
+}
+
+.property-card {
+  border: none;
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: white;
+  box-shadow: var(--card-shadow);
+}
+
+.property-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+.property-card img {
+  height: 220px;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.property-card:hover img { transform: scale(1.05); }
+
+.price-badge {
+  background: var(--primary);
+  color: white;
+  font-weight: 700;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.amenity-badge {
+  background: #f1f5f9;
+  color: #64748b;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  border: none;
+  padding: 0.6rem 1.4rem;
+  font-weight: 600;
+  border-radius: 10px;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover { background-color: var(--primary-hover); transform: scale(1.02); }
+
+.card { border-radius: 16px; border: 1px solid #f1f5f9; box-shadow: var(--card-shadow); }
+.form-control, .form-select { border-radius: 10px; padding: 0.7rem 1rem; border: 1px solid #e2e8f0; }
+.form-control:focus { box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); border-color: var(--primary); }
+
+.rating-stars { color: #f59e0b; font-size: 1.1rem; }
+
+.footer { padding: 4rem 0 2rem; border-top: 1px solid #e2e8f0; margin-top: 4rem; text-align: center; color: #94a3b8; }
+
+@media (max-width: 768px) {
+  .hero { padding: 1.5rem; text-align: center; }
+  .property-card img { height: 180px; }
+}

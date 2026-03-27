@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Your Dashboard - Rent a Home</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary"><div class="container"><a class="navbar-brand" href="index.html">Rent a Home</a><div id="nav-auth" class="ms-auto"></div></div></nav>
+
+<section class="container py-4">
+  <div class="row g-4">
+    <div class="col-md-3">
+      <div class="card p-4 shadow-sm border-0 sticky-top" style="top:100px">
+        <h5 class="fw-bold mb-3">Profile</h5>
+        <div id="profile-info" class="mb-4">Loading...</div>
+        <hr>
+        <a href="profile.html" class="btn btn-sm btn-outline-primary w-100 mb-2">Edit Profile</a>
+        <div class="mt-4"><h5 class="fw-bold mb-3">Notifications</h5><div id="notifications" class="small text-muted"></div></div>
+      </div>
+    </div>
+    <div class="col-md-9">
+      <div id="main-area" class="card p-4 shadow-sm border-0">
+        <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script type="module">
+import { requireAuth, getLocalUser, refreshLocalUser } from './js/auth.js';
+import { initNavbar, loadNotifications, generateInvoice } from './js/app.js';
+import { fetchProperties } from './js/properties.js';
+import { fetchBookingsForUser, respondBooking, payBooking } from './js/bookings.js';
+
+initNavbar();
+const u = requireAuth();
+let currentPayBookingId = null;
+
+async function handleBookingAction(id, status) {
+  try {
+    await respondBooking({ booking_id: id, status });
+    location.reload();
+  } catch(e) { alert(e.message); }
+}
+
+(async ()=>{
+  await refreshLocalUser();
+  const user = getLocalUser();
+  document.getElementById('profile-info').innerHTML = `
+    <div class="text-primary small fw-bold mb-1">${user.role.toUpperCase()}</div>
+    <strong class="h5">${user.full_name || user.email}</strong>
+  `;
+  await loadNotifications('notifications');
+  const main = document.getElementById('main-area');
+  
+  if(user.role === 'landlord'){
+    main.innerHTML = `<div class="d-flex justify-content-between align-items-center mb-4"><h4 class="fw-bold m-0">Owner Dashboard</h4><a href="add-property.html" class="btn btn-primary px-4">Add Listing</a></div><h5 class="fw-bold mb-3 small-muted">MY ACTIVE PROPERTIES</h5><div id="listings" class="row g-3 mb-5"></div><h5 class="fw-bold mb-3 small-muted">PENDING BOOKING REQUESTS</h5><div id="requests" class="mt-3"></div>`;
+    
+    const props = await fetchProperties({});
+    const myProps = props.filter(p => p.owner === user.id);
+    const listingsList = document.getElementById('listings');
+    if(!myProps.length) listingsList.innerHTML = '<div class="p-5 text-center text-muted card shadow-none bg-light border-0"><h5>No properties listed.</h5></div>';
+    else listingsList.innerHTML = myProps.map(p => `
+      <div class="col-md-6">
+        <div class="card h-100 shadow-sm border-0 bg-light">
+          <div class="card-body p-3">
+            <h6 class="fw-bold mb-1">${p.title}</h6>
+            <div class="small text-muted mb-3">${p.city} • Lease price: $${p.price}</div>
+            <a href="property-details.html?id=${p.id}" class="btn btn-sm btn-outline-primary">Manage View</a>
+          </div>
+        </div>
+      </div>`).join('');
+
+    const bookings = await fetchBookingsForUser(user.id);
+    const pending = bookings.filter(b => b.status === 'pending');
+    const reqDiv = document.getElementById('requests');
+    if(!pending.length) reqDiv.innerHTML = '<div class="p-4 text-center text-muted">No pending responses required.</div>';
+    else reqDiv.innerHTML = pending.map(b => `
+      <div class="card p-3 mb-3 shadow-none border bg-light">
+        <div class="d-flex justify-content-between align-items-center">
+          <div><div class="fw-bold mb-1">New Rent Inquiry</div><div class="small text-muted mb-1">"${b.message || 'No message provided'}"</div><div class="small text-muted">Requested Lease: ${b.start_date} to ${b.end_date}</div></div>
+          <div class="btn-group shadow-sm">
+            <button class="btn btn-sm btn-success btn-approve" data-id="${b.id}">Approve</button>
+            <button class="btn btn-sm btn-outline-danger btn-reject" data-id="${b.id}">Reject</button>
+          </div>
+        </div>
+      </div>`).join('');
+    
+    document.querySelectorAll('.btn-approve').forEach(btn => btn.onclick = () => handleBookingAction(btn.dataset.id, 'approved'));
+    document.querySelectorAll('.btn-reject').forEach(btn => btn.onclick = () => handleBookingAction(btn.dataset.id, 'rejected'));
+
+  } else {
+    // Tenant view
+    main.innerHTML = `<h4 class="fw-bold mb-4">Resident Dashboard</h4><h5 class="fw-bold mb-3 small-muted">ACTIVE & PAST LEASES</h5><div id="bookings-list" class="mt-3"></div>`;
+    const bookings = await fetchBookingsForUser(user.id);
+    const bDiv = document.getElementById('bookings-list');
+    if(!bookings.length) { bDiv.innerHTML = '<div class="p-5 text-center text-muted card shadow-none bg-light border-0"><h5>You haven\'t made any bookings yet.</h5></div>'; }
+    else {
+      
+      const propertiesCache = {};
+      const bookingsWithProps = await Promise.all(bookings.map(async b => {
+        if(!propertiesCache[b.property_id]) propertiesCache[b.property_id] = await fetchProperties({id: b.property_id});
+        return { ...b, property: propertiesCache[b.property_id][0] };
+      }));
+
+      bDiv.innerHTML = bookingsWithProps.map(b => `
+        <div class="card p-3 mb-3 border border-0 shadow-sm bg-light">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <div class="fw-bold mb-1 text-dark">${b.property?.title || 'Property Info Loading...'}</div>
+              <div class="mb-2">
+                <span class="badge ${b.status==='approved'?'bg-success':b.status==='rejected'?'bg-danger':'bg-warning'} status-badge">${b.status}</span>
+                ${b.is_paid ? '<span class="badge bg-primary status-badge ms-1">Paid & Confirmed</span>' : ''}
+              </div>
+              <div class="small text-muted font-monospace">Lease: ${b.start_date} - ${b.end_date}</div>
+            </div>
+            <div class="text-end">
+              ${(b.status === 'approved' && !b.is_paid) ? `<button class="btn btn-sm btn-success btn-pay px-4" data-id="${b.id}">Pay Now</button>` : ''}
+              ${b.is_paid ? `<button class="btn btn-sm btn-outline-primary btn-invoice" data-idx="${bookingsWithProps.indexOf(b)}">View Invoice</button>` : ''}
+              <a href="property-details.html?id=${b.property_id}" class="btn btn-sm btn-link text-decoration-none">Review Home</a>
+            </div>
+          </div>
+        </div>`).join('');
+      
+      document.querySelectorAll('.btn-pay').forEach(btn => btn.onclick = () => {
+        currentPayBookingId = btn.dataset.id;
+        const modal = new bootstrap.Modal(document.getElementById('paymentModal'));
+        document.getElementById('pay-booking-id').innerText = currentPayBookingId.slice(0,8).toUpperCase();
+        modal.show();
+      });
+      document.querySelectorAll('.btn-invoice').forEach(btn => btn.onclick = () => {
+        const b = bookingsWithProps[btn.dataset.idx];
+        generateInvoice(b, b.property);
+      });
+    }
+  }
+})();
+
+window.confirmPayment = async function() {
+  const btn = document.getElementById('btn-confirm-pay');
+  if(!currentPayBookingId) return;
+  btn.disabled = true; btn.innerText = 'Verifying Transaction...';
+  try {
+    await payBooking(currentPayBookingId);
+    location.reload();
+  } catch(e) {
+    alert('Secure Transaction Error: ' + e.message);
+    btn.disabled = false; btn.innerText = 'Retry Payment';
+  }
+}
+</script>
+
+<!-- Payment Modal -->
+<div class="modal fade" id="paymentModal" data-bs-backdrop="static" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header border-0 pb-0"><h5 class="modal-title fw-bold">Secure Gateway</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body text-center py-4">
+        <div class="bg-light p-3 rounded-4 mb-4">
+          <p class="small text-muted mb-1 text-uppercase fw-bold">Transaction Reference</p>
+          <div id="pay-booking-id" class="h5 fw-bold text-primary m-0"></div>
+        </div>
+        <div class="mb-4 d-flex gap-2">
+           <div class="card flex-fill p-3 border-0 bg-light text-start shadow-none">
+              <label class="small text-muted mb-2 fw-bold">VISA / MASTERCARD</label>
+              <div class="d-flex align-items-center gap-2">
+                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                 <span class="text-muted small">**** **** **** 4242</span>
+              </div>
+           </div>
+        </div>
+        <p class="small text-muted mb-0">Total amount will be deducted from your linked account.</p>
+      </div>
+      <div class="modal-footer border-0 pt-0 mt-2 px-4 pb-4"><button id="btn-confirm-pay" class="btn btn-primary btn-lg w-100 fw-bold py-3" onclick="confirmPayment()">Approve Payment</button></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

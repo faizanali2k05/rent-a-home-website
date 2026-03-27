@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login - Rent a Home</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary"><div class="container"><a class="navbar-brand" href="index.html">Rent a Home</a><div id="nav-auth" class="ms-auto"></div></div></nav>
+
+<section class="container py-5 d-flex align-items-center" style="min-height: 80vh;">
+  <div class="row w-100 justify-content-center">
+    <div class="col-md-5 col-lg-4">
+      <div class="card p-4 p-md-5 shadow-lg border-0 rounded-4 bg-white">
+        <h2 class="fw-bold mb-3 text-dark">Welcome back.</h2>
+        <p class="text-muted mb-5 small">Continue your journey to finding your next premium home.</p>
+        <div id="msg"></div>
+        <form id="login-form">
+          <div class="mb-3">
+            <label class="small fw-bold text-muted mb-1">EMAIL ADDRESS</label>
+            <input type="email" id="email" class="form-control py-2" placeholder="name@company.com" required>
+          </div>
+          <div class="mb-4">
+            <label class="small fw-bold text-muted mb-1 d-flex justify-content-between">PASSWORD <a href="#" class="text-decoration-none small fw-bold">Forgot?</a></label>
+            <input type="password" id="password" class="form-control py-2" placeholder="••••••••" required>
+          </div>
+          <button class="btn btn-primary w-100 py-3 fw-bold shadow-sm mb-4">Sign In</button>
+        </form>
+        <p class="text-center text-muted small mb-0">Don't have an account? <a href="register.html" class="fw-bold text-primary">Join us now</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script type="module">
+import { login, getLocalUser } from './js/auth.js';
+import { initNavbar } from './js/app.js';
+initNavbar();
+
+document.getElementById('login-form').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  const msg = document.getElementById('msg');
+  msg.innerHTML = '<div class="alert alert-info py-2 small">Authenticating...</div>';
+  try {
+    await login(email, password);
+    window.location.href = 'dashboard.html';
+  } catch(err) { msg.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`; }
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

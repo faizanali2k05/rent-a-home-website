@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Your Profile - Rent a Home</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary"><div class="container"><a class="navbar-brand" href="index.html">Rent a Home</a><div id="nav-auth" class="ms-auto"></div></div></nav>
+<section class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card p-4">
+        <h4>Your Profile</h4>
+        <div id="msg"></div>
+        <form id="profile-form">
+          <div class="mb-3"><label>Full name</label><input id="full_name" class="form-control"></div>
+          <div class="mb-3"><label>Phone</label><input id="phone" class="form-control"></div>
+          <div class="mb-3"><label>Role</label><select id="role" class="form-select"><option value="tenant">Tenant</option><option value="landlord">Landlord</option></select></div>
+          <button class="btn btn-primary">Save</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+<script type="module">
+import { requireAuth, getLocalUser, refreshLocalUser } from './js/auth.js';
+import { supabase } from './js/supabaseClient.js';
+import { initNavbar } from './js/app.js';
+
+initNavbar();
+requireAuth();
+(async ()=>{
+  await refreshLocalUser();
+  const u = getLocalUser();
+  if(!u) return;
+  const { data } = await supabase.from('profiles').select('*').eq('id', u.id).single();
+  if(data){ document.getElementById('full_name').value = data.full_name || ''; document.getElementById('phone').value = data.phone || ''; document.getElementById('role').value = data.role || 'tenant'; }
+  document.getElementById('profile-form').addEventListener('submit', async (e)=>{
+    e.preventDefault(); const full_name = document.getElementById('full_name').value; const phone = document.getElementById('phone').value; const role = document.getElementById('role').value;
+    const { error } = await supabase.from('profiles').update({ full_name, phone, role }).eq('id', u.id);
+    const msg = document.getElementById('msg');
+    if(error){
+      msg.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+    } else {
+      msg.innerHTML = `<div class="alert alert-success">Profile updated successfully.</div>`;
+      await refreshLocalUser();
+      initNavbar();
+    }
+  });
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
