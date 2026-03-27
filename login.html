@@ -46,7 +46,7 @@ document.getElementById('login-form').addEventListener('submit', async (e)=>{
   const msg = document.getElementById('msg');
   msg.innerHTML = '<div class="alert alert-info py-2 small">Authenticating...</div>';
   try {
-    await login(email, password);
+    await login({email, password});
     window.location.href = 'dashboard.html';
   } catch(err) { msg.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`; }
 });

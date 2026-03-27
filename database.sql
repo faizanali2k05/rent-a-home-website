@@ -64,6 +64,25 @@ CREATE TABLE IF NOT EXISTS bookings (
   created_at timestamptz DEFAULT now()
 );
 
+-- MIGRATION: Ensure 'is_paid' exists if table was created previously
+DO $$ 
+BEGIN 
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='bookings' AND column_name='is_paid') THEN
+    ALTER TABLE bookings ADD COLUMN is_paid boolean DEFAULT false;
+  END IF;
+END $$;
+
+-- Payments table (New: Track monthly rent payments)
+CREATE TABLE IF NOT EXISTS payments (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  booking_id uuid NOT NULL REFERENCES bookings(id) ON DELETE CASCADE,
+  tenant_id uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  amount numeric NOT NULL,
+  month text NOT NULL, -- e.g., 'March 2024'
+  paid_at timestamptz DEFAULT now(),
+  created_at timestamptz DEFAULT now()
+);
+
 -- Reviews table
 CREATE TABLE IF NOT EXISTS reviews (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -148,5 +167,14 @@ CREATE POLICY "notifications_insert" ON notifications FOR INSERT WITH CHECK (aut
 
 DROP POLICY IF EXISTS "notifications_select" ON notifications;
 CREATE POLICY "notifications_select" ON notifications FOR SELECT USING (auth.uid() = user_id);
+
+-- Policies: payments
+ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "payments_insert_tenant" ON payments;
+CREATE POLICY "payments_insert_tenant" ON payments FOR INSERT WITH CHECK (auth.uid() = tenant_id);
+
+DROP POLICY IF EXISTS "payments_select" ON payments;
+CREATE POLICY "payments_select" ON payments FOR SELECT USING (auth.uid() = tenant_id OR auth.uid() IN (SELECT owner FROM properties p JOIN bookings b ON b.property_id = p.id WHERE b.id = booking_id));
 
 -- End of schema

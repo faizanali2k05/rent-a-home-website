@@ -101,6 +101,14 @@ body {
 .footer { padding: 4rem 0 2rem; border-top: 1px solid #e2e8f0; margin-top: 4rem; text-align: center; color: #94a3b8; }
 
 @media (max-width: 768px) {
-  .hero { padding: 1.5rem; text-align: center; }
+  .hero { padding: 2rem 1.5rem; text-align: center; }
+  .navbar-brand { font-size: 1.2rem; }
+  .container { padding-left: 1.5rem; padding-right: 1.5rem; }
   .property-card img { height: 180px; }
+  .btn-lg { width: 100%; }
+  .status-badge { display: inline-block; margin-bottom: 5px; }
+  .sticky-top { position: static !important; margin-bottom: 2rem; }
 }
+
+.small-muted { font-size: 0.7rem; color: #94a3b8; letter-spacing: 1px; text-transform: uppercase; }
+.hover-bg:hover { background-color: #f1f5f9; cursor: pointer; }

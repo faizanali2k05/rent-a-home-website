@@ -1,27 +1,28 @@
 import { supabase } from './supabaseClient.js';
 import { getLocalUser, logout, refreshLocalUser } from './auth.js';
 
-export function generateInvoice(booking, property) {
+export function generateInvoice(booking, property, type = 'INVOICE', month = null) {
+  const title = type === 'RECEIPT' ? 'Payment Receipt' : 'Property Invoice';
   const invoiceHtml = `
     <html>
       <head>
-        <title>Invoice - Rent a Home</title>
+        <title>${title} - Rent a Home</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <style>body{padding:40px; font-family:sans-serif;} .header{border-bottom:2px solid #eee; padding-bottom:20px; margin-bottom:20px;}</style>
       </head>
       <body>
         <div class="header d-flex justify-content-between">
-          <div><h1>INVOICE</h1><p class="text-muted">ID: ${booking.id.slice(0,8).toUpperCase()}</p></div>
+          <div><h1>${type}</h1><p class="text-muted">ID: ${booking.id.slice(0,8).toUpperCase()}</p></div>
           <div class="text-end"><h4>Rent a Home</h4><p>${new Date().toLocaleDateString()}</p></div>
         </div>
         <div class="row mb-4">
           <div class="col-6"><h5>Property</h5><p>${property.title}<br>${property.city}</p></div>
-          <div class="col-6 text-end"><h5>Dates</h5><p>${booking.start_date} to ${booking.end_date}</p></div>
+          <div class="col-6 text-end"><h5>Info</h5><p>${month ? 'Rent Month: ' + month : 'Lease: ' + booking.start_date + ' to ' + booking.end_date}</p></div>
         </div>
         <table class="table">
           <thead><tr><th>Description</th><th class="text-end">Amount</th></tr></thead>
           <tbody>
-            <tr><td>Total Rent</td><td class="text-end">$${property.price}</td></tr>
+            <tr><td>${month ? 'Rent for ' + month : 'Total Rent'}</td><td class="text-end">$${property.price}</td></tr>
             <tr><td><strong>Total Paid</strong></td><td class="text-end"><strong>$${property.price}</strong></td></tr>
           </tbody>
         </table>

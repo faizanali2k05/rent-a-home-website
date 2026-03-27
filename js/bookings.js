@@ -22,24 +22,38 @@ export async function payBooking(bookingId) {
   try {
     const prop = await supabase.from('properties').select('owner,title').eq('id', data.property_id).single();
     if(prop.data) {
-      // Notify landlord
       await supabase.from('notifications').insert({ 
         user_id: prop.data.owner, 
         type: 'payment_received', 
         title: 'Payment Received', 
-        message: `Rent payment received for ${prop.data.title}`, 
-        meta: { booking: bookingId } 
-      });
-      // Notify tenant
-      await supabase.from('notifications').insert({ 
-        user_id: data.tenant_id, 
-        type: 'payment_success', 
-        title: 'Payment Successful', 
-        message: `Your rent for ${prop.data.title} has been confirmed.`, 
+        message: `Initial rent payment received for ${prop.data.title}`, 
         meta: { booking: bookingId } 
       });
     }
   } catch(e) {}
+  return data;
+}
+
+export async function payRentByMonth({ booking_id, tenant_id, amount, month }){
+  const { data, error } = await supabase.from('payments').insert({ booking_id, tenant_id, amount, month }).select().single();
+  if(error) throw error;
+
+  // Notify landlord
+  try{
+    const bookingRes = await supabase.from('bookings').select('property_id').eq('id', booking_id).single();
+    if(bookingRes.data){
+      const prop = await supabase.from('properties').select('owner,title').eq('id', bookingRes.data.property_id).single();
+      if(prop.data){
+        await supabase.from('notifications').insert({ user_id: prop.data.owner, title: 'Rent Paid', message: `Rent for ${month} paid for ${prop.data.title}`, meta: { payment: data.id } });
+      }
+    }
+  }catch(e){}
+  return data;
+}
+
+export async function fetchPayments(userId){
+  const { data, error } = await supabase.from('payments').select('*, bookings(property_id, properties(title))').eq('tenant_id', userId).order('paid_at', {ascending:false});
+  if(error) throw error;
   return data;
 }
 

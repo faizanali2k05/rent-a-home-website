@@ -19,6 +19,10 @@
         <div id="msg"></div>
         <form id="register-form">
            <div class="mb-3">
+            <label class="small fw-bold text-muted mb-1">FULL NAME</label>
+            <input type="text" id="full_name" class="form-control py-2 shadow-none" placeholder="John Doe" required>
+          </div>
+           <div class="mb-3">
             <label class="small fw-bold text-muted mb-1">EMAIL ADDRESS</label>
             <input type="email" id="email" class="form-control py-2 shadow-none" placeholder="name@company.com" required>
           </div>
@@ -48,13 +52,15 @@ initNavbar();
 
 document.getElementById('register-form').addEventListener('submit', async (e)=>{
   e.preventDefault();
+  const full_name = document.getElementById('full_name').value;
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
   const role = document.getElementById('role').value;
   const msg = document.getElementById('msg');
   msg.innerHTML = '<div class="alert alert-info py-2 small">Building profile...</div>';
   try {
-    await register(email, password, role);
+    // PASS AS AN OBJECT TO MATCH THE DESTRUCTURED PARAMETER
+    await register({email, password, full_name, role});
     msg.innerHTML = '<div class="alert alert-success py-2 small">Account created! Redirecting...</div>';
     setTimeout(() => window.location.href = 'dashboard.html', 1000);
   } catch(err) { msg.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`; }
