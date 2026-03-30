@@ -110,5 +110,10 @@ body {
   .sticky-top { position: static !important; margin-bottom: 2rem; }
 }
 
+/* No-image placeholder */
+.no-image { background: linear-gradient(180deg, #eef2ff, #f8fafc); height: 200px; color: #334155; border-radius: 0.5rem; }
+.no-image h4 { margin: 0; font-size: 1.1rem; }
+.no-image.small { height: 160px; }
+
 .small-muted { font-size: 0.7rem; color: #94a3b8; letter-spacing: 1px; text-transform: uppercase; }
 .hover-bg:hover { background-color: #f1f5f9; cursor: pointer; }

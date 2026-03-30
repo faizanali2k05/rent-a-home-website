@@ -32,7 +32,7 @@
 <script type="module">
 import { requireAuth, getLocalUser, refreshLocalUser } from './js/auth.js';
 import { initNavbar, loadNotifications, generateInvoice } from './js/app.js';
-import { fetchProperties } from './js/properties.js';
+import { fetchProperties, getMyProperties, deleteProperty } from './js/properties.js';
 import { fetchBookingsForUser, respondBooking, payBooking, payRentByMonth, fetchPayments } from './js/bookings.js';
 
 initNavbar();
@@ -59,20 +59,40 @@ async function handleBookingAction(id, status) {
   if(user.role === 'landlord'){
     main.innerHTML = `<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2"><h4 class="fw-bold m-0">Owner Dashboard</h4><a href="add-property.html" class="btn btn-primary px-4">Add Listing</a></div><h5 class="fw-bold mb-3 small-muted">MY ACTIVE PROPERTIES</h5><div id="listings" class="row g-3 mb-5"></div><h5 class="fw-bold mb-3 small-muted">PENDING BOOKING REQUESTS</h5><div id="requests" class="mt-3"></div>`;
     
-    const props = await fetchProperties({});
-    const myProps = props.filter(p => p.owner === user.id);
+    const props = await getMyProperties();
     const listingsList = document.getElementById('listings');
-    if(!myProps.length) listingsList.innerHTML = '<div class="p-5 text-center text-muted card shadow-none bg-light border-0 w-100"><h5>No properties listed.</h5></div>';
-    else listingsList.innerHTML = myProps.map(p => `
+    if(!props.length) listingsList.innerHTML = '<div class="p-5 text-center text-muted card shadow-none bg-light border-0 w-100"><h5>No properties listed.</h5></div>';
+    else listingsList.innerHTML = props.map(p => `
       <div class="col-md-6 w-100-mobile">
         <div class="card h-100 shadow-sm border-0 bg-light">
           <div class="card-body p-3">
             <h6 class="fw-bold mb-1">${p.title}</h6>
-            <div class="small text-muted mb-3">${p.city} • Lease price: $${p.price}</div>
-            <a href="property-details.html?id=${p.id}" class="btn btn-sm btn-outline-primary">Manage View</a>
+            <div class="small text-muted mb-3">${p.city} • Lease price: $${p.price}/mo • ${p.bedrooms} bed</div>
+            <div class="d-flex gap-2 flex-wrap">
+              <a href="property-details.html?id=${p.id}" class="btn btn-sm btn-outline-primary flex-grow-1">View</a>
+              <a href="edit-property.html?id=${p.id}" class="btn btn-sm btn-outline-secondary flex-grow-1">Edit</a>
+              <button class="btn btn-sm btn-outline-danger btn-delete-prop" data-id="${p.id}" data-title="${p.title}">Delete</button>
+            </div>
           </div>
         </div>
       </div>`).join('');
+
+    // Delete property handler
+    document.querySelectorAll('.btn-delete-prop').forEach(btn => {
+      btn.onclick = async () => {
+        const propId = btn.dataset.id;
+        const propTitle = btn.dataset.title;
+        if(confirm(`Are you sure you want to permanently delete "${propTitle}"? This action cannot be undone.`)){
+          try{
+            await deleteProperty(propId);
+            alert('Property permanently deleted');
+            location.reload();
+          }catch(err){
+            alert('Error deleting property: ' + err.message);
+          }
+        }
+      };
+    });
 
     const bookings = await fetchBookingsForUser(user.id);
     const pending = bookings.filter(b => b.status === 'pending');

@@ -2,21 +2,45 @@ import { supabase } from './supabaseClient.js';
 
 // Fetch properties with optional filters
 export async function fetchProperties({city, minPrice, maxPrice, bedrooms, limit = 20, offset = 0} = {}){
-  let q = supabase.from('properties').select('*').eq('is_deleted', false).order('created_at', {ascending:false}).range(offset, offset + limit -1);
-  if(city) q = q.ilike('city', `%${city}%`);
-  if(bedrooms) q = q.eq('bedrooms', bedrooms);
-  // price range
-  if(minPrice) q = q.gte('price', minPrice);
-  if(maxPrice) q = q.lte('price', maxPrice);
-  const { data, error } = await q;
-  if(error) throw error;
-  return data;
+  try{
+    let q = supabase.from('properties').select('*').order('created_at', {ascending:false}).range(offset, offset + limit -1);
+    if(city) q = q.ilike('city', `%${city}%`);
+    if(bedrooms) q = q.eq('bedrooms', bedrooms);
+    if(minPrice) q = q.gte('price', minPrice);
+    if(maxPrice) q = q.lte('price', maxPrice);
+    const { data, error } = await q;
+    console.log('fetchProperties query result:', { dataLength: data?.length, error });
+    if(error){
+      console.error('fetchProperties error:', error);
+      // Provide richer error info to help debugging (RLS / permission issues often appear here)
+      if(error.details) console.error('details:', error.details);
+      if(error.hint) console.error('hint:', error.hint);
+      // Return empty array so UI can still render gracefully
+      return [];
+    }
+    console.log('Returning', data?.length || 0, 'properties');
+    return data || [];
+  }catch(err){
+    console.error('Unexpected fetchProperties exception:', err);
+    return [];
+  }
 }
 
 export async function getPropertyById(id){
-  const { data, error } = await supabase.from('properties').select('*').eq('id', id).single();
-  if(error) throw error;
-  return data;
+  try {
+    const { data, error } = await supabase.from('properties').select('*').eq('id', id).single();
+    if(error) {
+      console.error('getPropertyById error:', error);
+      if(error.details) console.error('details:', error.details);
+      if(error.hint) console.error('hint:', error.hint);
+      throw error;
+    }
+    console.log('Property loaded:', data);
+    return data;
+  } catch(err) {
+    console.error('Unexpected error in getPropertyById:', err);
+    throw err;
+  }
 }
 
 // Previously used to upload multiple images to a bucket, now removed as we use direct URLs
@@ -49,13 +73,66 @@ export async function addProperty({owner, title, description, city, address, pri
 }
 
 export async function updateProperty(id, updates){
-  const { data, error } = await supabase.from('properties').update(updates).eq('id', id).select().single();
-  if(error) throw error;
-  return data;
+  try {
+    // Don't select after update - just do the update
+    const { error } = await supabase.from('properties').update(updates).eq('id', id);
+    if(error){
+      console.error('Update RLS/DB Error:', error);
+      if(error.details) console.error('Details:', error.details);
+      if(error.hint) console.error('Hint:', error.hint);
+      throw error;
+    }
+    // Fetch fresh data after successful update
+    const { data, fetchError } = await supabase.from('properties').select('*').eq('id', id).single();
+    if(fetchError) {
+      console.error('Fetch after update error:', fetchError);
+      // Return empty object if fetch fails, but update succeeded
+      return { id };
+    }
+    console.log('Property updated successfully. New data:', data);
+    return data;
+  } catch(err) {
+    console.error('Unexpected error in updateProperty:', err);
+    throw err;
+  }
+}
+
+export async function deleteProperty(id){
+  try {
+    // Hard delete - completely remove from database
+    const { error } = await supabase.from('properties').delete().eq('id', id);
+    if(error){
+      console.error('Delete RLS/DB Error:', error);
+      if(error.details) console.error('Details:', error.details);
+      if(error.hint) console.error('Hint:', error.hint);
+      throw error;
+    }
+    console.log('Property permanently deleted');
+    return { id, deleted: true };
+  } catch(err) {
+    console.error('Unexpected error in deleteProperty:', err);
+    throw err;
+  }
 }
 
 export async function softDeleteProperty(id){
-  const { data, error } = await supabase.from('properties').update({ is_deleted: true }).eq('id', id).select().single();
-  if(error) throw error;
-  return data;
+  // Deprecated: Use deleteProperty instead for hard delete
+  return deleteProperty(id);
+}
+
+// Get properties owned by current user
+export async function getMyProperties(){
+  try{
+    const { data: userData } = await supabase.auth.getUser();
+    const ownerId = userData?.user?.id;
+    if(!ownerId) throw new Error('Not authenticated');
+    
+    const { data, error } = await supabase.from('properties').select('*').eq('owner', ownerId).order('created_at', {ascending:false});
+    if(error) throw error;
+    console.log('getMyProperties result:', { dataLength: data?.length, error });
+    return data || [];
+  }catch(err){
+    console.error('Error fetching user properties:', err);
+    return [];
+  }
 }

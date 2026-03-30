@@ -1,9 +1,41 @@
 -- Supabase-compatible SQL schema for Rent a Home Website
 -- Run once in Supabase SQL editor to set up the database structure
--- Updated to use direct URL strings instead of Supabase Storage buckets
+-- Updated with real-time sync support (updated_at timestamps and triggers)
 
 -- Enable UUID generator
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+-- Function to auto-update updated_at timestamp
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Optional RPC function: Get all bookings for a user (both as tenant and landlord)
+CREATE OR REPLACE FUNCTION get_bookings_for_user(uid uuid)
+RETURNS TABLE(
+  id uuid,
+  property_id uuid,
+  tenant_id uuid,
+  start_date date,
+  end_date date,
+  status text,
+  is_paid boolean,
+  message text,
+  created_at timestamptz,
+  updated_at timestamptz
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT b.id, b.property_id, b.tenant_id, b.start_date, b.end_date, b.status, b.is_paid, b.message, b.created_at, b.updated_at
+  FROM bookings b
+  WHERE b.tenant_id = uid 
+    OR b.property_id IN (SELECT id FROM properties WHERE owner = uid);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Clean up existing storage buckets if they exist
 -- (Run this if you want to completely remove storage-based image management)
@@ -16,8 +48,24 @@ CREATE TABLE IF NOT EXISTS profiles (
   phone text,
   role text CHECK (role IN ('tenant','landlord','admin')),
   avatar_url text, -- Store direct public image URL
-  created_at timestamptz DEFAULT now()
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
 );
+
+-- MIGRATION: Add updated_at to profiles if missing
+DO $$ 
+BEGIN 
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='profiles' AND column_name='updated_at') THEN
+    ALTER TABLE profiles ADD COLUMN updated_at timestamptz DEFAULT now();
+  END IF;
+END $$;
+
+-- Trigger to auto-update profiles.updated_at
+DROP TRIGGER IF EXISTS profiles_updated_at_trigger ON profiles;
+CREATE TRIGGER profiles_updated_at_trigger
+BEFORE UPDATE ON profiles
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
 
 -- Properties table
 CREATE TABLE IF NOT EXISTS properties (
@@ -33,23 +81,35 @@ CREATE TABLE IF NOT EXISTS properties (
   amenities text[] DEFAULT '{}',
   availability boolean DEFAULT true,
   image_url text, -- Store single image URL (replaces bucket image path)
-  is_deleted boolean DEFAULT false,
-  created_at timestamptz DEFAULT now()
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
 );
 
--- MIGRATION: Ensure 'image_url' exists if table was created previously with 'images'
+-- MIGRATION: Ensure 'image_url' and 'updated_at' exist if table was created previously
 DO $$ 
 BEGIN 
   -- Add image_url if missing
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='properties' AND column_name='image_url') THEN
     ALTER TABLE properties ADD COLUMN image_url text;
   END IF;
-
-  -- Optional: Drop old 'images' column if it exists to clean up
-  -- IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='properties' AND column_name='images') THEN
-  --   ALTER TABLE properties DROP COLUMN images;
-  -- END IF;
+  
+  -- Add updated_at if missing
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='properties' AND column_name='updated_at') THEN
+    ALTER TABLE properties ADD COLUMN updated_at timestamptz DEFAULT now();
+  END IF;
+  
+  -- Remove is_deleted column if it exists (we use hard deletes now)
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='properties' AND column_name='is_deleted') THEN
+    ALTER TABLE properties DROP COLUMN is_deleted;
+  END IF;
 END $$;
+
+-- Trigger to auto-update properties.updated_at
+DROP TRIGGER IF EXISTS properties_updated_at_trigger ON properties;
+CREATE TRIGGER properties_updated_at_trigger
+BEFORE UPDATE ON properties
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
 
 -- Bookings table
 CREATE TABLE IF NOT EXISTS bookings (
@@ -61,16 +121,27 @@ CREATE TABLE IF NOT EXISTS bookings (
   status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','approved','rejected')),
   is_paid boolean DEFAULT false, -- Track if rent is paid
   message text,
-  created_at timestamptz DEFAULT now()
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
 );
 
--- MIGRATION: Ensure 'is_paid' exists if table was created previously
+-- MIGRATION: Ensure 'is_paid' and 'updated_at' exist if table was created previously
 DO $$ 
 BEGIN 
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='bookings' AND column_name='is_paid') THEN
     ALTER TABLE bookings ADD COLUMN is_paid boolean DEFAULT false;
   END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='bookings' AND column_name='updated_at') THEN
+    ALTER TABLE bookings ADD COLUMN updated_at timestamptz DEFAULT now();
+  END IF;
 END $$;
+
+-- Trigger to auto-update bookings.updated_at
+DROP TRIGGER IF EXISTS bookings_updated_at_trigger ON bookings;
+CREATE TRIGGER bookings_updated_at_trigger
+BEFORE UPDATE ON bookings
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
 
 -- Payments table (New: Track monthly rent payments)
 CREATE TABLE IF NOT EXISTS payments (
@@ -80,8 +151,24 @@ CREATE TABLE IF NOT EXISTS payments (
   amount numeric NOT NULL,
   month text NOT NULL, -- e.g., 'March 2024'
   paid_at timestamptz DEFAULT now(),
-  created_at timestamptz DEFAULT now()
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
 );
+
+-- MIGRATION: Add updated_at to payments if missing
+DO $$ 
+BEGIN 
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='payments' AND column_name='updated_at') THEN
+    ALTER TABLE payments ADD COLUMN updated_at timestamptz DEFAULT now();
+  END IF;
+END $$;
+
+-- Trigger to auto-update payments.updated_at
+DROP TRIGGER IF EXISTS payments_updated_at_trigger ON payments;
+CREATE TRIGGER payments_updated_at_trigger
+BEFORE UPDATE ON payments
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
 
 -- Reviews table
 CREATE TABLE IF NOT EXISTS reviews (
@@ -90,8 +177,24 @@ CREATE TABLE IF NOT EXISTS reviews (
   tenant_id uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   rating int NOT NULL CHECK (rating >=1 AND rating <=5),
   comment text,
-  created_at timestamptz DEFAULT now()
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
 );
+
+-- MIGRATION: Add updated_at to reviews if missing
+DO $$ 
+BEGIN 
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='reviews' AND column_name='updated_at') THEN
+    ALTER TABLE reviews ADD COLUMN updated_at timestamptz DEFAULT now();
+  END IF;
+END $$;
+
+-- Trigger to auto-update reviews.updated_at
+DROP TRIGGER IF EXISTS reviews_updated_at_trigger ON reviews;
+CREATE TRIGGER reviews_updated_at_trigger
+BEFORE UPDATE ON reviews
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
 
 -- Notifications table
 CREATE TABLE IF NOT EXISTS notifications (
@@ -102,14 +205,35 @@ CREATE TABLE IF NOT EXISTS notifications (
   message text,
   is_read boolean DEFAULT false,
   meta jsonb DEFAULT '{}',
-  created_at timestamptz DEFAULT now()
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
 );
+
+-- MIGRATION: Add updated_at to notifications if missing
+DO $$ 
+BEGIN 
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notifications' AND column_name='updated_at') THEN
+    ALTER TABLE notifications ADD COLUMN updated_at timestamptz DEFAULT now();
+  END IF;
+END $$;
+
+-- Trigger to auto-update notifications.updated_at
+DROP TRIGGER IF EXISTS notifications_updated_at_trigger ON notifications;
+CREATE TRIGGER notifications_updated_at_trigger
+BEFORE UPDATE ON notifications
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
 
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_properties_city ON properties(city);
 CREATE INDEX IF NOT EXISTS idx_properties_price ON properties(price);
+CREATE INDEX IF NOT EXISTS idx_properties_owner ON properties(owner);
+CREATE INDEX IF NOT EXISTS idx_properties_updated_at ON properties(updated_at DESC);
 CREATE INDEX IF NOT EXISTS idx_bookings_tenant ON bookings(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_bookings_property ON bookings(property_id);
+CREATE INDEX IF NOT EXISTS idx_bookings_updated_at ON bookings(updated_at DESC);
 CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_profiles_updated_at ON profiles(updated_at DESC);
 
 -- ROW LEVEL SECURITY: enable RLS on tables
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
@@ -129,15 +253,16 @@ DROP POLICY IF EXISTS "profiles_update_own" ON profiles;
 CREATE POLICY "profiles_update_own" ON profiles FOR UPDATE USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
 
 -- Policies: properties
+DROP POLICY IF EXISTS "properties_select_public" ON properties;
+CREATE POLICY "properties_select_public" ON properties FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "properties_select_owner" ON properties;
 DROP POLICY IF EXISTS "properties_select" ON properties;
-CREATE POLICY "properties_select" ON properties FOR SELECT USING (is_deleted = false);
 
 DROP POLICY IF EXISTS "properties_insert_owner" ON properties;
-CREATE POLICY "properties_insert_owner" ON properties FOR INSERT WITH CHECK (owner = auth.uid());
+CREATE POLICY "properties_insert_owner" ON properties FOR INSERT WITH CHECK (auth.uid() IS NOT NULL AND owner = auth.uid());
 
 DROP POLICY IF EXISTS "properties_insert_auth_owner" ON properties;
-CREATE POLICY "properties_insert_auth_owner" ON properties FOR INSERT WITH CHECK (auth.uid() IS NOT NULL AND owner = auth.uid());
-
 DROP POLICY IF EXISTS "properties_update_owner" ON properties;
 CREATE POLICY "properties_update_owner" ON properties FOR UPDATE USING (owner = auth.uid()) WITH CHECK (owner = auth.uid());
 
@@ -152,7 +277,10 @@ DROP POLICY IF EXISTS "bookings_select" ON bookings;
 CREATE POLICY "bookings_select" ON bookings FOR SELECT USING (auth.uid() = tenant_id OR auth.uid() IN (select owner from properties where id = property_id));
 
 DROP POLICY IF EXISTS "bookings_update_landlord" ON bookings;
-CREATE POLICY "bookings_update_landlord" ON bookings FOR UPDATE USING (auth.uid() IN (select owner from properties where id = property_id) OR auth.uid() = tenant_id);
+CREATE POLICY "bookings_update_landlord" ON bookings FOR UPDATE USING (auth.uid() IN (select owner from properties where id = property_id) OR auth.uid() = tenant_id) WITH CHECK (auth.uid() IN (select owner from properties where id = property_id) OR auth.uid() = tenant_id);
+
+DROP POLICY IF EXISTS "bookings_delete_landlord" ON bookings;
+CREATE POLICY "bookings_delete_landlord" ON bookings FOR DELETE USING (auth.uid() IN (select owner from properties where id = property_id) OR auth.uid() = tenant_id);
 
 -- Policies: reviews
 DROP POLICY IF EXISTS "reviews_insert_tenant" ON reviews;

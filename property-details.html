@@ -8,7 +8,19 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary"><div class="container"><a class="navbar-brand" href="index.html">Rent a Home</a><div id="nav-auth" class="ms-auto"></div></div></nav>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">Rent a Home</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
+      </ul>
+      <div id="nav-auth" class="d-flex"></div>
+    </div>
+  </div>
+</nav>
 <section class="container py-4">
   <div id="content"></div>
   <script type="module">
@@ -57,52 +69,79 @@
       }
 
       const mainImg = p.image_url || 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&q=80&w=1000';
+      const media = mainImg ? `<img src="${mainImg}" class="img-fluid rounded-3 mb-3" style="height:400px; width:100%; object-fit:cover;" alt="Property">` : `<div class="no-image d-flex align-items-center justify-content-center mb-3" style="height:400px;"><h3>No image available</h3></div>`;
+
       content.innerHTML = `
-        <div class="row g-4">
-          <div class="col-md-8">
-            <div class="mb-4"><img src="${mainImg}" class="img-fluid rounded-4 shadow-sm w-100" style="height:450px; object-fit:cover"></div>
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <div><h1 class="h3 fw-bold mb-1">${p.title}</h1><p class="text-muted mb-0">${p.city} • ${p.bedrooms} Beds • ${p.bathrooms} Baths</p></div>
-              <div class="text-end"><span class="price-badge h5 mb-0">$${p.price} <small class="fw-normal">/mo</small></span></div>
+        <div class="row">
+          <div class="col-md-7">
+            ${media}
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <h3>${p.title}</h3>
+                <div class="small-muted">${p.city} • ${p.bedrooms} bed • ${p.bathrooms} bath</div>
+              </div>
+              <div><span class="price-badge">$${p.price}</span></div>
             </div>
-            <div class="card p-4 border-0 shadow-sm mb-4">
-              <h5 class="fw-bold mb-3">Description</h5>
-              <p>${p.description || 'Premium property in a prime location.'}</p>
-              <div class="d-flex flex-wrap gap-2 mt-2">${(p.amenities||[]).map(a=>`<span class="amenity-badge">${a}</span>`).join('')}</div>
-            </div>
-            <div class="mt-5">
-              <h5 class="fw-bold mb-4">Recent Reviews</h5>
-              <div id="reviews-list">Loading reviews...</div>
-              ${(user && !isOwner) ? `
-                <div class="card p-4 mt-4 border-0 shadow-sm bg-light">
-                  <h6 class="fw-bold mb-3">Post a Review</h6>
-                  <form id="review-form">
-                    <div class="mb-3"><label class="small fw-bold text-muted mb-1">Rating</label><select id="rating" class="form-select form-select-sm w-auto"><option value="5">5 Stars</option><option value="4">4 Stars</option><option value="3">3 Stars</option><option value="2">2 Stars</option><option value="1">1 Star</option></select></div>
-                    <div class="mb-3"><textarea id="comment" class="form-control" rows="3" placeholder="Share your experience..."></textarea></div>
-                    <button class="btn btn-sm btn-primary">Submit Review</button>
-                  </form>
-                </div>` : ''}
-            </div>
+            <p class="mt-3">${p.description || ''}</p>
+            <div class="card-amenities mb-3">${(p.amenities||[]).map(a=>`<span class="amenity-badge">${a}</span>`).join('')}</div>
+            <hr>
+            <h5>Reviews</h5>
+            <div id="reviews-list"></div>
+            ${isOwner ? '' : `
+            <h5 class="mt-4">Request Booking</h5>
+            <form id="booking-form" class="mb-3">
+              <div class="row">
+                <div class="col-md-6"><input type="date" id="start" class="form-control" required></div>
+                <div class="col-md-6"><input type="date" id="end" class="form-control" required></div>
+              </div>
+              <textarea id="message" class="form-control mt-2" placeholder="Message to owner..."  rows="3"></textarea>
+              <button type="submit" class="btn btn-primary mt-2">Submit Request</button>
+              <div id="booking-msg"></div>
+            </form>
+            `}
+            ${residentBooking ? `<button id="btn-invoice" class="btn btn-success">Generate Invoice</button>` : ''}
           </div>
-          <div class="col-md-4">
-            <div class="card p-4 border-0 shadow-sm border-0">
-              ${residentBooking ? `
-                <div class="text-center py-3">
-                  <div class="text-success mb-3"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/></svg></div>
-                  <h5 class="fw-bold">Lease Active</h5>
-                  <p class="text-muted small">You are the current resident from <strong>${residentBooking.start_date}</strong>. Lease is fully paid.</p>
-                  <button id="btn-invoice" class="btn btn-primary w-100 mt-2">Get Invoice</button>
-                </div>` : isOwner ? `
-                <div class="text-center py-4"><h5 class="fw-bold">Managed by You</h5><p class="text-muted small">Check your dashboard for booking requests.</p><a href="dashboard.html" class="btn btn-primary w-100">Go to Dashboard</a></div>` : `
-                <h5 class="fw-bold mb-4">Reserve Home</h5>
-                <div id="booking-msg"></div>
-                <form id="booking-form">
-                  <div class="mb-3"><label class="small fw-bold text-muted mb-1">Check-in</label><input type="date" id="start" class="form-control" required></div>
-                  <div class="mb-3"><label class="small fw-bold text-muted mb-1">Check-out</label><input type="date" id="end" class="form-control" required></div>
-                  <div class="mb-3"><textarea id="message" class="form-control" rows="3" placeholder="Additional query..."></textarea></div>
-                  <button class="btn btn-primary w-100 py-2">Request Visit</button>
-                </form>`}
+          <div class="col-md-5">
+            <div class="card shadow-sm">
+              <div class="card-body">
+                <h5>Property Details</h5>
+                <div class="mb-3">
+                  <strong>Price:</strong> $${p.price}/month
+                </div>
+                <div class="mb-3">
+                  <strong>Location:</strong> ${p.city}
+                </div>
+                <div class="mb-3">
+                  <strong>Address:</strong> ${p.address || 'N/A'}
+                </div>
+                <div class="mb-3">
+                  <strong>Bedrooms:</strong> ${p.bedrooms}
+                </div>
+                <div class="mb-3">
+                  <strong>Bathrooms:</strong> ${p.bathrooms}
+                </div>
+              </div>
             </div>
+            ${!isOwner ? `<div class="card shadow-sm mt-3">
+              <div class="card-body">
+                <h5>Leave a Review</h5>
+                <form id="review-form">
+                  <div class="mb-2">
+                    <label class="form-label">Rating</label>
+                    <select id="rating" class="form-select" required>
+                      <option value="">Select...</option>
+                      <option value="5">5 - Excellent</option>
+                      <option value="4">4 - Good</option>
+                      <option value="3">3 - Average</option>
+                      <option value="2">2 - Poor</option>
+                      <option value="1">1 - Terrible</option>
+                    </select>
+                  </div>
+                  <textarea id="comment" class="form-control mb-2" placeholder="Your review..." rows="3"></textarea>
+                  <button type="submit" class="btn btn-primary w-100">Submit Review</button>
+                </form>
+              </div>
+            </div>` : ''}
           </div>
         </div>
       `;
@@ -113,9 +152,15 @@
       if(document.getElementById('review-form')){
         document.getElementById('review-form').addEventListener('submit', async (ev)=>{
           ev.preventDefault();
+          if(!user){ window.location.href = 'login.html'; return; }
           const rating = parseInt(document.getElementById('rating').value);
           const comment = document.getElementById('comment').value;
-          try{ await addReview({ property_id: id, tenant_id: user.id, rating, comment }); await renderReviews(); document.getElementById('review-form').reset(); } catch(e){ alert(e.message); }
+          try{ 
+            await addReview({ property_id: id, tenant_id: user.id, rating, comment }); 
+            await renderReviews(); 
+            document.getElementById('review-form').reset(); 
+            alert('Review submitted!');
+          } catch(e){ alert('Error: ' + e.message); }
         });
       }
 
@@ -129,10 +174,10 @@
           try{
             await createBooking({ property_id: p.id, tenant_id: user.id, start_date: start, end_date: end, message });
             document.getElementById('booking-msg').innerHTML = '<div class="alert alert-success mt-2">Request Sent!</div>';
-          }catch(err){ document.getElementById('booking-msg').innerHTML = `<div class="alert alert-danger mt-2">${err.message}</div>`; }
+          }catch(err){ document.getElementById('booking-msg').innerHTML = `<div class="alert alert-danger mt-2">Error: ${err.message}</div>`; }
         });
       }
-    }catch(err){ content.innerHTML = `<div class="alert alert-danger">${err.message}</div>`; }
+    }catch(err){ console.error('Property details error:', err); content.innerHTML = `<div class="alert alert-danger">${err.message || 'Error loading property'}</div>`; }
   })();
   </script>
 </body>

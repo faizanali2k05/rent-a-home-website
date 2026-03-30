@@ -21,7 +21,7 @@ export async function register({email, password, full_name, phone, role}){
   if(pErr) throw pErr;
 
   // store minimal info locally
-  localStorage.setItem('rental_user', JSON.stringify({id: user.id, email, role}));
+  localStorage.setItem('rental_user', JSON.stringify({id: user.id, email, role, full_name}));
   return { user };
 }
 
@@ -31,11 +31,11 @@ export async function login({email, password}){
   const user = data.user;
   if(!user) return { user: null };
 
-  // fetch profile to get role
+  // fetch profile to get role and full_name
   const { data: profileData, error: profErr } = await supabase.from('profiles').select('*').eq('id', user.id).single();
   if(profErr) throw profErr;
 
-  localStorage.setItem('rental_user', JSON.stringify({id: user.id, email: user.email, role: profileData?.role}));
+  localStorage.setItem('rental_user', JSON.stringify({id: user.id, email: user.email, role: profileData?.role, full_name: profileData?.full_name}));
   return { user, profile: profileData };
 }
 
