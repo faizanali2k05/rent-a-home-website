@@ -10,25 +10,28 @@
 <body class="bg-light">
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary"><div class="container"><a class="navbar-brand" href="index.html">Rent a Home</a><div id="nav-auth" class="ms-auto"></div></div></nav>
 
-<section class="container py-5 d-flex align-items-center" style="min-height: 80vh;">
+<section class="container py-4 py-md-5 d-flex align-items-center" style="min-height: 85vh;">
   <div class="row w-100 justify-content-center">
-    <div class="col-md-5 col-lg-4">
+    <div class="col-12 col-sm-10 col-md-6 col-lg-5">
       <div class="card p-4 p-md-5 shadow-lg border-0 rounded-4 bg-white">
-        <h2 class="fw-bold mb-3 text-dark">Welcome back.</h2>
-        <p class="text-muted mb-5 small">Continue your journey to finding your next premium home.</p>
+        <h2 class="fw-bold mb-2 text-dark">Welcome back.</h2>
+        <p class="text-muted mb-4 small">Continue your journey to finding your next premium home.</p>
         <div id="msg"></div>
         <form id="login-form">
           <div class="mb-3">
-            <label class="small fw-bold text-muted mb-1">EMAIL ADDRESS</label>
+            <label class="small fw-bold text-muted mb-2 d-block">EMAIL ADDRESS</label>
             <input type="email" id="email" class="form-control py-2" placeholder="name@company.com" required>
           </div>
           <div class="mb-4">
-            <label class="small fw-bold text-muted mb-1 d-flex justify-content-between">PASSWORD <a href="#" class="text-decoration-none small fw-bold">Forgot?</a></label>
+            <label class="small fw-bold text-muted mb-2 d-flex justify-content-between">
+              <span>PASSWORD</span> 
+              <a href="#" class="text-decoration-none small fw-bold">Forgot?</a>
+            </label>
             <input type="password" id="password" class="form-control py-2" placeholder="••••••••" required>
           </div>
           <button class="btn btn-primary w-100 py-3 fw-bold shadow-sm mb-4">Sign In</button>
         </form>
-        <p class="text-center text-muted small mb-0">Don't have an account? <a href="register.html" class="fw-bold text-primary">Join us now</a></p>
+        <p class="text-center text-muted small mb-0">Don't have an account? <a href="register.html" class="fw-bold text-primary text-decoration-none">Join us now</a></p>
       </div>
     </div>
   </div>

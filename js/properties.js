@@ -123,16 +123,39 @@ export async function softDeleteProperty(id){
 // Get properties owned by current user
 export async function getMyProperties(){
   try{
-    const { data: userData } = await supabase.auth.getUser();
-    const ownerId = userData?.user?.id;
-    if(!ownerId) throw new Error('Not authenticated');
+    const { data: userData, error: authError } = await supabase.auth.getUser();
+    console.log('getMyProperties - Auth check:', { userData: userData?.user?.id, authError });
     
+    const ownerId = userData?.user?.id;
+    if(!ownerId) throw new Error('Not authenticated - cannot get user ID');
+    
+    console.log('Fetching properties where owner =', ownerId);
     const { data, error } = await supabase.from('properties').select('*').eq('owner', ownerId).order('created_at', {ascending:false});
+    
+    console.log('getMyProperties query result:', { 
+      userId: ownerId,
+      propertiesFound: data?.length || 0, 
+      error: error?.message,
+      data: data 
+    });
+    
     if(error) throw error;
-    console.log('getMyProperties result:', { dataLength: data?.length, error });
     return data || [];
   }catch(err){
     console.error('Error fetching user properties:', err);
+    return [];
+  }
+}
+
+// Debug function: Get ALL properties (bypass owner filter) to check if properties exist at all
+export async function getAllPropertiesDebug(){
+  try{
+    console.log('DEBUG: Fetching ALL properties (no owner filter)...');
+    const { data, error } = await supabase.from('properties').select('*').order('created_at', {ascending:false});
+    console.log('DEBUG: All properties in database:', { count: data?.length || 0, data: data, error });
+    return data || [];
+  }catch(err){
+    console.error('DEBUG: Error fetching all properties:', err);
     return [];
   }
 }

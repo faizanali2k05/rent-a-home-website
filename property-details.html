@@ -21,7 +21,7 @@
     </div>
   </div>
 </nav>
-<section class="container py-4">
+<section class="container py-3 py-md-4">
   <div id="content"></div>
   <script type="module">
   import { initNavbar, generateInvoice } from './js/app.js';
@@ -69,75 +69,80 @@
       }
 
       const mainImg = p.image_url || 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&q=80&w=1000';
-      const media = mainImg ? `<img src="${mainImg}" class="img-fluid rounded-3 mb-3" style="height:400px; width:100%; object-fit:cover;" alt="Property">` : `<div class="no-image d-flex align-items-center justify-content-center mb-3" style="height:400px;"><h3>No image available</h3></div>`;
+      const media = mainImg ? `<img src="${mainImg}" class="img-fluid rounded-3 mb-3 w-100" style="height:300px; object-fit:cover;" alt="Property">` : `<div class="no-image d-flex align-items-center justify-content-center mb-3" style="height:300px;"><h3>No image available</h3></div>`;
 
       content.innerHTML = `
-        <div class="row">
-          <div class="col-md-7">
+        <div class="row g-3 g-md-4">
+          <div class="col-lg-7 col-12">
             ${media}
-            <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="d-flex justify-content-between align-items-start mb-3 flex-column flex-sm-row gap-2">
               <div>
-                <h3>${p.title}</h3>
+                <h3 class="fw-bold">${p.title}</h3>
                 <div class="small-muted">${p.city} • ${p.bedrooms} bed • ${p.bathrooms} bath</div>
               </div>
-              <div><span class="price-badge">$${p.price}</span></div>
+              <div class="flex-shrink-0"><span class="price-badge">$${p.price}</span></div>
             </div>
-            <p class="mt-3">${p.description || ''}</p>
-            <div class="card-amenities mb-3">${(p.amenities||[]).map(a=>`<span class="amenity-badge">${a}</span>`).join('')}</div>
-            <hr>
-            <h5>Reviews</h5>
+            <p class="mt-3 text-muted">${p.description || ''}</p>
+            <div class="card-amenities mb-4">${(p.amenities||[]).map(a=>`<span class="amenity-badge">${a}</span>`).join('')}</div>
+            <hr class="my-4">
+            <h5 class="fw-bold mb-3">Reviews</h5>
             <div id="reviews-list"></div>
             ${isOwner ? '' : `
-            <h5 class="mt-4">Request Booking</h5>
+            <h5 class="fw-bold mt-4 mb-3">Request Booking</h5>
             <form id="booking-form" class="mb-3">
-              <div class="row">
-                <div class="col-md-6"><input type="date" id="start" class="form-control" required></div>
-                <div class="col-md-6"><input type="date" id="end" class="form-control" required></div>
+              <div class="row g-2">
+                <div class="col-12 col-sm-6"><input type="date" id="start" class="form-control" placeholder="Start Date" required></div>
+                <div class="col-12 col-sm-6"><input type="date" id="end" class="form-control" placeholder="End Date" required></div>
               </div>
-              <textarea id="message" class="form-control mt-2" placeholder="Message to owner..."  rows="3"></textarea>
-              <button type="submit" class="btn btn-primary mt-2">Submit Request</button>
+              <textarea id="message" class="form-control mt-3" placeholder="Message to owner..."  rows="3"></textarea>
+              <button type="submit" class="btn btn-primary w-100 mt-3">Submit Request</button>
               <div id="booking-msg"></div>
             </form>
             `}
-            ${residentBooking ? `<button id="btn-invoice" class="btn btn-success">Generate Invoice</button>` : ''}
+            ${residentBooking ? `<button id="btn-invoice" class="btn btn-success w-100">Generate Invoice</button>` : ''}
           </div>
-          <div class="col-md-5">
-            <div class="card shadow-sm">
+          <div class="col-lg-5 col-12">
+            <div class="card shadow-sm border-0 mb-3">
               <div class="card-body">
-                <h5>Property Details</h5>
-                <div class="mb-3">
-                  <strong>Price:</strong> $${p.price}/month
+                <h5 class="fw-bold mb-3">Property Details</h5>
+                <div class="mb-3 pb-3 border-bottom">
+                  <strong class="d-block text-muted small mb-1">Price</strong>
+                  <span class="fs-5 text-primary">$${p.price}/month</span>
                 </div>
-                <div class="mb-3">
-                  <strong>Location:</strong> ${p.city}
+                <div class="mb-3 pb-3 border-bottom">
+                  <strong class="d-block text-muted small mb-1">Location</strong>
+                  <span>${p.city}</span>
                 </div>
-                <div class="mb-3">
-                  <strong>Address:</strong> ${p.address || 'N/A'}
+                <div class="mb-3 pb-3 border-bottom">
+                  <strong class="d-block text-muted small mb-1">Address</strong>
+                  <span>${p.address || 'N/A'}</span>
                 </div>
-                <div class="mb-3">
-                  <strong>Bedrooms:</strong> ${p.bedrooms}
+                <div class="mb-3 pb-3 border-bottom">
+                  <strong class="d-block text-muted small mb-1">Bedrooms</strong>
+                  <span>${p.bedrooms}</span>
                 </div>
-                <div class="mb-3">
-                  <strong>Bathrooms:</strong> ${p.bathrooms}
+                <div>
+                  <strong class="d-block text-muted small mb-1">Bathrooms</strong>
+                  <span>${p.bathrooms}</span>
                 </div>
               </div>
             </div>
-            ${!isOwner ? `<div class="card shadow-sm mt-3">
+            ${!isOwner ? `<div class="card shadow-sm border-0">
               <div class="card-body">
-                <h5>Leave a Review</h5>
+                <h5 class="fw-bold mb-3">Leave a Review</h5>
                 <form id="review-form">
-                  <div class="mb-2">
-                    <label class="form-label">Rating</label>
+                  <div class="mb-3">
+                    <label class="form-label fw-500">Rating</label>
                     <select id="rating" class="form-select" required>
-                      <option value="">Select...</option>
-                      <option value="5">5 - Excellent</option>
-                      <option value="4">4 - Good</option>
-                      <option value="3">3 - Average</option>
-                      <option value="2">2 - Poor</option>
-                      <option value="1">1 - Terrible</option>
+                      <option value="">Select rating...</option>
+                      <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                      <option value="4">⭐⭐⭐⭐ Good</option>
+                      <option value="3">⭐⭐⭐ Average</option>
+                      <option value="2">⭐⭐ Poor</option>
+                      <option value="1">⭐ Terrible</option>
                     </select>
                   </div>
-                  <textarea id="comment" class="form-control mb-2" placeholder="Your review..." rows="3"></textarea>
+                  <textarea id="comment" class="form-control mb-3" placeholder="Your review..." rows="3"></textarea>
                   <button type="submit" class="btn btn-primary w-100">Submit Review</button>
                 </form>
               </div>

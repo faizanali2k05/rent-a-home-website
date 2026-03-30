@@ -23,22 +23,22 @@
 </nav>
 
 <section class="container py-5">
-  <div class="row hero align-items-center mb-5 gx-5">
-    <div class="col-lg-7">
-      <h1 class="display-4 fw-extrabold mb-3 text-dark" style="font-weight:800; line-height:1.2;">Better Living <br><span class="text-primary">Starts Here.</span></h1>
-      <p class="lead text-muted mb-4 fs-5">Browse our curated collection of verified premium rental properties. Experience a seamless booking journey from tour to lease.</p>
+  <div class="row hero align-items-center mb-5 gx-3 gx-md-5">
+    <div class="col-lg-7 col-12">
+      <h1 class="display-5 display-sm-6 fw-extrabold mb-3 text-dark" style="font-weight:800; line-height:1.2;">Better Living <br><span class="text-primary">Starts Here.</span></h1>
+      <p class="lead text-muted mb-4 fs-6 fs-md-5">Browse our curated collection of verified premium rental properties. Experience a seamless booking journey from tour to lease.</p>
       <div id="btn-list-prop"></div>
     </div>
     <div class="col-lg-5 d-none d-lg-block">
     </div>
   </div>
 
-  <div class="d-flex justify-content-between align-items-end mb-4">
-    <div><h2 class="fw-bold mb-0">Featured Properties</h2><p class="text-muted small">Hand-picked listings for your consideration</p></div>
-    <div class="text-end"><span class="badge bg-light text-dark shadow-sm px-3 py-2">Discover More</span></div>
+  <div class="d-flex justify-content-between align-items-end mb-4 flex-column flex-md-row gap-3">
+    <div class="order-1 order-md-0"><h2 class="fw-bold mb-0">Featured Properties</h2><p class="text-muted small">Hand-picked listings for your consideration</p></div>
+    <div class="text-md-end order-0 order-md-1"><span class="badge bg-light text-dark shadow-sm px-3 py-2">Discover More</span></div>
   </div>
 
-  <div id="properties-grid" class="row g-4 mb-5">
+  <div id="properties-grid" class="row g-3 g-md-4 mb-5">
     <!-- Loaded via JS -->
     <div class="col-12 text-center py-5"><div class="spinner-border text-primary"></div></div>
   </div>
@@ -90,7 +90,7 @@ try {
     propertiesGrid.innerHTML = properties.map(p=>{
       const img = (p.image_url) ? `<img src="${p.image_url}" class="card-img-top" alt="${p.title}">` : `<div class="no-image d-flex align-items-center justify-content-center"><h4>No image</h4></div>`;
       return `
-      <div class="col-md-4">
+      <div class="col-12 col-sm-6 col-lg-4">
         <div class="card property-card h-100">
           <div style="position:relative">
             ${img}
@@ -99,10 +99,10 @@ try {
           <div class="card-body d-flex flex-column">
             <h5 class="card-title">${p.title}</h5>
             <div class="small-muted mb-2">${p.city} • ${p.bedrooms} bed • ${p.bathrooms} bath</div>
-            <p class="card-text">${(p.description||'').slice(0,120)}...</p>
-            <div class="mt-auto d-flex justify-content-between align-items-center">
-              <div class="card-amenities">${(p.amenities||[]).slice(0,3).map(a=>`<span class="amenity-badge">${a}</span>`).join('')}</div>
-              <a href="property-details.html?id=${p.id}" class="btn btn-sm btn-primary">View</a>
+            <p class="card-text flex-grow-1">${(p.description||'').slice(0,120)}...</p>
+            <div class="mt-auto d-flex justify-content-between align-items-center gap-2 flex-wrap">
+              <div class="card-amenities">${(p.amenities||[]).slice(0,2).map(a=>`<span class="amenity-badge">${a}</span>`).join('')}</div>
+              <a href="property-details.html?id=${p.id}" class="btn btn-sm btn-primary flex-shrink-0">View</a>
             </div>
           </div>
         </div>

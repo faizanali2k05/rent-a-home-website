@@ -9,25 +9,53 @@
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary"><div class="container"><a class="navbar-brand" href="index.html">Rent a Home</a><div id="nav-auth" class="ms-auto"></div></div></nav>
-<section class="container py-4">
+<section class="container py-3 py-md-4">
   <div class="row justify-content-center">
-    <div class="col-md-8">
-      <div class="card p-4">
-        <h4>Add Property</h4>
+    <div class="col-12 col-md-8 col-lg-7">
+      <div class="card p-3 p-md-4 border-0 shadow-sm">
+        <h4 class="fw-bold mb-3">Add Property</h4>
         <div id="msg"></div>
         <form id="prop-form">
-          <div class="mb-3"><label>Title</label><input id="title" class="form-control" required></div>
-          <div class="mb-3"><label>City</label><input id="city" class="form-control" required></div>
-          <div class="mb-3"><label>Address</label><input id="address" class="form-control"></div>
-          <div class="row g-2">
-            <div class="col-md-4 mb-3"><label>Price</label><input id="price" type="number" class="form-control" required></div>
-            <div class="col-md-4 mb-3"><label>Bedrooms</label><input id="bedrooms" type="number" class="form-control"></div>
-            <div class="col-md-4 mb-3"><label>Bathrooms</label><input id="bathrooms" type="number" class="form-control"></div>
+          <div class="mb-3">
+            <label class="form-label fw-500">Title *</label>
+            <input id="title" class="form-control" required>
           </div>
-          <div class="mb-3"><label>Description</label><textarea id="description" class="form-control"></textarea></div>
-          <div class="mb-3"><label>Amenities (comma separated)</label><input id="amenities" class="form-control"></div>
-          <div class="mb-3"><label>Image URL</label><input id="imageUrl" class="form-control" placeholder="https://example.com/image.jpg"></div>
-          <button class="btn btn-primary">Add property</button>
+          <div class="mb-3">
+            <label class="form-label fw-500">City *</label>
+            <input id="city" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-500">Address</label>
+            <input id="address" class="form-control">
+          </div>
+          <div class="row g-2 g-md-3">
+            <div class="col-12 col-sm-4 mb-3">
+              <label class="form-label fw-500">Price ($/mo) *</label>
+              <input id="price" type="number" class="form-control" required>
+            </div>
+            <div class="col-12 col-sm-4 mb-3">
+              <label class="form-label fw-500">Bedrooms</label>
+              <input id="bedrooms" type="number" class="form-control" value="1">
+            </div>
+            <div class="col-12 col-sm-4 mb-3">
+              <label class="form-label fw-500">Bathrooms</label>
+              <input id="bathrooms" type="number" class="form-control" value="1">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-500">Description</label>
+            <textarea id="description" class="form-control" rows="4"></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-500">Amenities (comma separated)</label>
+            <input id="amenities" class="form-control" placeholder="WiFi, Parking, Pool, Gym">
+          </div>
+          <div class="mb-4">
+            <label class="form-label fw-500">Image URL</label>
+            <input id="imageUrl" class="form-control" placeholder="https://example.com/image.jpg">
+            <small class="text-muted d-block mt-1">Provide a direct image URL (jpeg/png)</small>
+          </div>
+          <button class="btn btn-primary btn-lg w-100">Add Property</button>
         </form>
       </div>
     </div>

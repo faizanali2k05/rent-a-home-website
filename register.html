@@ -10,36 +10,36 @@
 <body class="bg-light">
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary"><div class="container"><a class="navbar-brand" href="index.html">Rent a Home</a><div id="nav-auth" class="ms-auto"></div></div></nav>
 
-<section class="container py-5 d-flex align-items-center" style="min-height: 80vh;">
+<section class="container py-4 py-md-5 d-flex align-items-center" style="min-height: 85vh;">
   <div class="row w-100 justify-content-center">
-    <div class="col-md-5 col-lg-4">
+    <div class="col-12 col-sm-10 col-md-6 col-lg-5">
       <div class="card p-4 p-md-5 shadow-lg border-0 rounded-4 bg-white">
-        <h2 class="fw-bold mb-3 text-dark">Join us.</h2>
-        <p class="text-muted mb-5 small">Find or manage a premium new home today.</p>
+        <h2 class="fw-bold mb-2 text-dark">Join us.</h2>
+        <p class="text-muted mb-4 small">Find or manage a premium new home today.</p>
         <div id="msg"></div>
         <form id="register-form">
            <div class="mb-3">
-            <label class="small fw-bold text-muted mb-1">FULL NAME</label>
-            <input type="text" id="full_name" class="form-control py-2 shadow-none" placeholder="John Doe" required>
+            <label class="small fw-bold text-muted mb-2 d-block">FULL NAME</label>
+            <input type="text" id="full_name" class="form-control py-2" placeholder="John Doe" required>
           </div>
            <div class="mb-3">
-            <label class="small fw-bold text-muted mb-1">EMAIL ADDRESS</label>
-            <input type="email" id="email" class="form-control py-2 shadow-none" placeholder="name@company.com" required>
+            <label class="small fw-bold text-muted mb-2 d-block">EMAIL ADDRESS</label>
+            <input type="email" id="email" class="form-control py-2" placeholder="name@company.com" required>
           </div>
           <div class="mb-3">
-            <label class="small fw-bold text-muted mb-1">PASSWORD</label>
-            <input type="password" id="password" class="form-control py-2 shadow-none" placeholder="••••••••" required>
+            <label class="small fw-bold text-muted mb-2 d-block">PASSWORD</label>
+            <input type="password" id="password" class="form-control py-2" placeholder="••••••••" required>
           </div>
-          <div class="mb-5">
-            <label class="small fw-bold text-muted mb-1">I WANT TO BE A...</label>
-            <select id="role" class="form-select py-2 shadow-none" required>
+          <div class="mb-4">
+            <label class="small fw-bold text-muted mb-2 d-block">I WANT TO BE A...</label>
+            <select id="role" class="form-select py-2" required>
               <option value="tenant">Resident (Find a Home)</option>
               <option value="landlord">Owner (List a Home)</option>
             </select>
           </div>
           <button class="btn btn-primary w-100 py-3 fw-bold shadow-sm mb-4">Create Account</button>
         </form>
-        <p class="text-center text-muted small mb-0">Already a member? <a href="login.html" class="fw-bold text-primary">Sign in</a></p>
+        <p class="text-center text-muted small mb-0">Already a member? <a href="login.html" class="fw-bold text-primary text-decoration-none">Sign in</a></p>
       </div>
     </div>
   </div>

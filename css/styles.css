@@ -1,4 +1,4 @@
-/* Premium Modern Styles for Rent a Home */
+/* Premium Modern Styles for Rent a Home - Mobile Responsive */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
 :root {
@@ -9,30 +9,85 @@
   --card-shadow-hover: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
 body {
   background-color: var(--bg);
   color: #1e293b;
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   line-height: 1.6;
+  display: flex;
+  flex-direction: column;
 }
 
+main, section {
+  flex: 1;
+}
+
+/* Navbar - Mobile First */
 .navbar {
   box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
   padding: 0.8rem 0;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
-.navbar-brand { font-weight: 800; font-size: 1.4rem; letter-spacing: -0.5px; }
+.navbar-brand { 
+  font-weight: 800; 
+  font-size: 1.4rem; 
+  letter-spacing: -0.5px;
+}
 
+.navbar-nav {
+  gap: 0.5rem;
+}
+
+.nav-link {
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.nav-link:hover {
+  color: rgba(255,255,255,0.8) !important;
+}
+
+/* Hero Section - Mobile First */
 .hero {
   background: white;
   border-radius: 20px;
-  padding: 3rem;
+  padding: 3rem 2rem;
   box-shadow: var(--card-shadow);
   border: 1px solid #f1f5f9;
+  margin-bottom: 2rem;
 }
 
+@media (max-width: 576px) {
+  .hero {
+    padding: 1.5rem 1rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+  }
+  
+  .hero h1 {
+    font-size: 1.75rem !important;
+    line-height: 1.2 !important;
+  }
+  
+  .hero .lead {
+    font-size: 1rem !important;
+  }
+}
+
+/* Property Card - Mobile Responsive */
 .property-card {
   border: none;
   border-radius: 16px;
@@ -40,6 +95,9 @@ body {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background: white;
   box-shadow: var(--card-shadow);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .property-card:hover {
@@ -53,8 +111,41 @@ body {
   transition: transform 0.5s ease;
 }
 
-.property-card:hover img { transform: scale(1.05); }
+.property-card:hover img { 
+  transform: scale(1.05); 
+}
 
+@media (max-width: 768px) {
+  .property-card img {
+    height: 180px;
+  }
+}
+
+@media (max-width: 576px) {
+  .property-card img {
+    height: 150px;
+  }
+  
+  .property-card {
+    border-radius: 12px;
+  }
+}
+
+.property-card .card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+}
+
+.property-card .card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 0.5rem;
+}
+
+/* Price Badge */
 .price-badge {
   background: var(--primary);
   color: white;
@@ -62,14 +153,25 @@ body {
   padding: 0.5rem 1rem;
   border-radius: 10px;
   font-size: 0.95rem;
+  white-space: nowrap;
 }
 
+@media (max-width: 576px) {
+  .price-badge {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+  }
+}
+
+/* Status & Amenity Badges */
 .status-badge {
   padding: 4px 12px;
   border-radius: 20px;
   font-weight: 600;
   font-size: 0.75rem;
   text-transform: uppercase;
+  display: inline-block;
+  margin-bottom: 4px;
 }
 
 .amenity-badge {
@@ -79,41 +181,229 @@ body {
   border-radius: 8px;
   font-size: 0.8rem;
   font-weight: 500;
+  display: inline-block;
+  margin: 2px 2px;
+}
+
+/* Buttons - Mobile Responsive */
+.btn {
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.2s;
+  padding: 0.6rem 1.4rem;
 }
 
 .btn-primary {
   background-color: var(--primary);
   border: none;
-  padding: 0.6rem 1.4rem;
-  font-weight: 600;
+}
+
+.btn-primary:hover { 
+  background-color: var(--primary-hover);
+  transform: scale(1.02);
+}
+
+.btn-lg {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+}
+
+@media (max-width: 576px) {
+  .btn-lg {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Forms - Mobile Optimized */
+.form-control, 
+.form-select {
   border-radius: 10px;
-  transition: all 0.2s;
+  padding: 0.7rem 1rem;
+  border: 1px solid #e2e8f0;
+  font-size: 1rem;
+  transition: all 0.3s;
 }
 
-.btn-primary:hover { background-color: var(--primary-hover); transform: scale(1.02); }
-
-.card { border-radius: 16px; border: 1px solid #f1f5f9; box-shadow: var(--card-shadow); }
-.form-control, .form-select { border-radius: 10px; padding: 0.7rem 1rem; border: 1px solid #e2e8f0; }
-.form-control:focus { box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); border-color: var(--primary); }
-
-.rating-stars { color: #f59e0b; font-size: 1.1rem; }
-
-.footer { padding: 4rem 0 2rem; border-top: 1px solid #e2e8f0; margin-top: 4rem; text-align: center; color: #94a3b8; }
-
-@media (max-width: 768px) {
-  .hero { padding: 2rem 1.5rem; text-align: center; }
-  .navbar-brand { font-size: 1.2rem; }
-  .container { padding-left: 1.5rem; padding-right: 1.5rem; }
-  .property-card img { height: 180px; }
-  .btn-lg { width: 100%; }
-  .status-badge { display: inline-block; margin-bottom: 5px; }
-  .sticky-top { position: static !important; margin-bottom: 2rem; }
+@media (max-width: 576px) {
+  .form-control,
+  .form-select {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+  }
 }
 
-/* No-image placeholder */
-.no-image { background: linear-gradient(180deg, #eef2ff, #f8fafc); height: 200px; color: #334155; border-radius: 0.5rem; }
-.no-image h4 { margin: 0; font-size: 1.1rem; }
-.no-image.small { height: 160px; }
+.form-control:focus, 
+.form-select:focus {
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+  border-color: var(--primary);
+  outline: none;
+}
 
-.small-muted { font-size: 0.7rem; color: #94a3b8; letter-spacing: 1px; text-transform: uppercase; }
-.hover-bg:hover { background-color: #f1f5f9; cursor: pointer; }
+/* Cards */
+.card {
+  border-radius: 16px;
+  border: 1px solid #f1f5f9;
+  box-shadow: var(--card-shadow);
+  transition: all 0.3s;
+}
+
+@media (max-width: 576px) {
+  .card {
+    border-radius: 12px;
+  }
+}
+
+/* Rating Stars */
+.rating-stars {
+  color: #f59e0b;
+  font-size: 1.1rem;
+  letter-spacing: 2px;
+}
+
+/* Footer */
+.footer {
+  padding: 3rem 0 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  margin-top: 3rem;
+  text-align: center;
+  color: #94a3b8;
+  background: white;
+}
+
+@media (max-width: 576px) {
+  .footer {
+    padding: 2rem 0 1rem;
+    margin-top: 2rem;
+  }
+  
+  .footer .row {
+    flex-direction: column;
+    text-align: center !important;
+  }
+  
+  .footer a {
+    display: inline-block;
+    margin: 0.5rem 0.5rem;
+  }
+}
+
+/* Image Placeholder */
+.no-image {
+  background: linear-gradient(180deg, #eef2ff, #f8fafc);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #334155;
+  border-radius: 0.5rem;
+  font-weight: 500;
+}
+
+.no-image h4 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.no-image.small {
+  height: 160px;
+}
+
+/* Utility Classes */
+.small-muted {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.hover-bg:hover {
+  background-color: #f1f5f9;
+  cursor: pointer;
+}
+
+.w-100-mobile {
+  width: 100%;
+}
+
+/* Container Padding - Mobile Responsive */
+@media (max-width: 576px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  section { 
+    padding: 1.5rem 0 !important; 
+  }
+  
+  .sticky-top {
+    position: static !important;
+    margin-bottom: 2rem;
+  }
+}
+
+/* Grid Spacing - Mobile Responsive */
+.g-3 {
+  --bs-gutter-x: 1rem;
+  --bs-gutter-y: 1rem;
+}
+
+@media (max-width: 576px) {
+  .g-3 {
+    --bs-gutter-x: 0.75rem;
+    --bs-gutter-y: 0.75rem;
+  }
+  
+  .g-4 {
+    --bs-gutter-x: 0.75rem;
+    --bs-gutter-y: 0.75rem;
+  }
+}
+
+/* Typography - Mobile Responsive */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  color: #1e293b;
+}
+
+@media (max-width: 576px) {
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.25rem; }
+  h4 { font-size: 1.1rem; }
+  h5 { font-size: 1rem; }
+}
+
+/* Display utilities */
+@media (max-width: 992px) {
+  .d-lg-block {
+    display: none !important;
+  }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
