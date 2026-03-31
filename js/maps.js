@@ -1,6 +1,6 @@
 let envConfigPromise;
 let mapsApiPromise;
-const FALLBACK_GOOGLE_MAPS_API_KEY = 'AIzaSyD1uN1zVm4l15WuL94ugjLsXcWXnPQa7tw';
+const FALLBACK_GOOGLE_MAPS_API_KEY = '';
 
 function parseEnv(text) {
   return text
