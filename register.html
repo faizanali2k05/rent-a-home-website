@@ -4,31 +4,52 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Create Account - Rent a Home</title>
+  <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
 </head>
-<body class="bg-light">
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary"><div class="container"><a class="navbar-brand" href="index.html">Rent a Home</a><div id="nav-auth" class="ms-auto"></div></div></nav>
+<body>
+<div id="hover-bg" aria-hidden="true"></div>
+<nav class="navbar">
+  <div class="container">
+    <a href="index.html" class="brand-home" aria-label="Home">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M4 10.5L12 4l8 6.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M6.5 9.5V20h11V9.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M10 20v-5h4v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </a>
+    <ul class="nav-list">
+      <li><a href="index.html#footer" class="list-item">About Us</a></li>
+    </ul>
+    <div class="mobile-menu" onclick="showMenu()">
+      <div class="line line1"></div>
+      <div class="line line2"></div>
+      <div class="line line3"></div>
+    </div>
+    <div id="nav-auth"></div>
+  </div>
+</nav>
 
-<section class="container py-4 py-md-5 d-flex align-items-center" style="min-height: 85vh;">
+<section class="container glass py-4 py-md-5 d-flex align-items-center mt-4" style="min-height: 85vh;" data-hover-bg="./images/4.jpeg">
   <div class="row w-100 justify-content-center">
     <div class="col-12 col-sm-10 col-md-6 col-lg-5">
-      <div class="card p-4 p-md-5 shadow-lg border-0 rounded-4 bg-white">
-        <h2 class="fw-bold mb-2 text-dark">Join us.</h2>
+      <div class="card p-4 p-md-5 shadow-lg border-0 rounded-4">
+        <h2 class="fw-bold mb-2">Join us.</h2>
         <p class="text-muted mb-4 small">Find or manage a premium new home today.</p>
         <div id="msg"></div>
         <form id="register-form">
-           <div class="mb-3">
+          <div class="mb-3">
             <label class="small fw-bold text-muted mb-2 d-block">FULL NAME</label>
             <input type="text" id="full_name" class="form-control py-2" placeholder="John Doe" required>
           </div>
-           <div class="mb-3">
+          <div class="mb-3">
             <label class="small fw-bold text-muted mb-2 d-block">EMAIL ADDRESS</label>
             <input type="email" id="email" class="form-control py-2" placeholder="name@company.com" required>
           </div>
           <div class="mb-3">
             <label class="small fw-bold text-muted mb-2 d-block">PASSWORD</label>
-            <input type="password" id="password" class="form-control py-2" placeholder="••••••••" required>
+            <input type="password" id="password" class="form-control py-2" placeholder="Create a strong password" required>
           </div>
           <div class="mb-4">
             <label class="small fw-bold text-muted mb-2 d-block">I WANT TO BE A...</label>
@@ -39,18 +60,53 @@
           </div>
           <button class="btn btn-primary w-100 py-3 fw-bold shadow-sm mb-4">Create Account</button>
         </form>
-        <p class="text-center text-muted small mb-0">Already a member? <a href="login.html" class="fw-bold text-primary text-decoration-none">Sign in</a></p>
+        <p class="text-center text-muted small mb-0">Already a member? <a href="login.html" class="fw-bold text-decoration-none">Sign in</a></p>
       </div>
     </div>
   </div>
 </section>
 
+<footer id="footer" class="site-footer">
+  <div class="container py-3 text-center">
+    <h3 class="fw-bold mb-1">Rent a Home</h3>
+    <p class="small-muted mb-3">Connecting landlords and tenants with a modern, secure rental platform.</p>
+    <div class="student-grid mb-2">
+      <div class="student-card">
+        <strong>Reyan Abbas</strong>
+        <span class="student-meta">Roll No: BSF2206491</span>
+        <a class="email-widget" href="mailto:reyan97531@gmail.com" aria-label="Email Reyan Abbas">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 7.25C3 6.01 4.01 5 5.25 5h13.5C19.99 5 21 6.01 21 7.25v9.5C21 17.99 19.99 19 18.75 19H5.25C4.01 19 3 17.99 3 16.75v-9.5Z" stroke="currentColor" stroke-width="1.4"/><path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>reyan97531@gmail.com</span>
+        </a>
+      </div>
+      <div class="student-card">
+        <strong>Tayyaba Fiaz</strong>
+        <span class="student-meta">Roll No: BSF2206471</span>
+        <a class="email-widget" href="mailto:tayyaba.fiaz03@gmail.com" aria-label="Email Tayyaba Fiaz">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 7.25C3 6.01 4.01 5 5.25 5h13.5C19.99 5 21 6.01 21 7.25v9.5C21 17.99 19.99 19 18.75 19H5.25C4.01 19 3 17.99 3 16.75v-9.5Z" stroke="currentColor" stroke-width="1.4"/><path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>tayyaba.fiaz03@gmail.com</span>
+        </a>
+      </div>
+      <div class="student-card">
+        <strong>Haseeb Ullah</strong>
+        <span class="student-meta">Roll No: BSF2206481</span>
+        <a class="email-widget" href="mailto:haseebkhaliq0001@gmail.com" aria-label="Email Haseeb Ullah">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 7.25C3 6.01 4.01 5 5.25 5h13.5C19.99 5 21 6.01 21 7.25v9.5C21 17.99 19.99 19 18.75 19H5.25C4.01 19 3 17.99 3 16.75v-9.5Z" stroke="currentColor" stroke-width="1.4"/><path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>haseebkhaliq0001@gmail.com</span>
+        </a>
+      </div>
+    </div>
+    <div class="text-muted small mt-2">University Of Education, Multan Campus | &copy; 2026 Rent a Home</div>
+  </div>
+</footer>
+
 <script type="module">
 import { register } from './js/auth.js';
 import { initNavbar } from './js/app.js';
+
 initNavbar();
 
-document.getElementById('register-form').addEventListener('submit', async (e)=>{
+document.getElementById('register-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const full_name = document.getElementById('full_name').value;
   const email = document.getElementById('email').value;
@@ -59,11 +115,12 @@ document.getElementById('register-form').addEventListener('submit', async (e)=>{
   const msg = document.getElementById('msg');
   msg.innerHTML = '<div class="alert alert-info py-2 small">Building profile...</div>';
   try {
-    // PASS AS AN OBJECT TO MATCH THE DESTRUCTURED PARAMETER
-    await register({email, password, full_name, role});
+    await register({ email, password, full_name, role });
     msg.innerHTML = '<div class="alert alert-success py-2 small">Account created! Redirecting...</div>';
     setTimeout(() => window.location.href = 'dashboard.html', 1000);
-  } catch(err) { msg.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`; }
+  } catch (err) {
+    msg.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+  }
 });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

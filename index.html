@@ -1,123 +1,130 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Rent a Home - Find Your Perfect Place</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House Rent Services</title>
+    <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-  <div class="container">
-    <a class="navbar-brand" href="index.html">Rent a Home</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
-    <div class="collapse navbar-collapse" id="mainNav">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
-        <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
-      </ul>
-      <div id="nav-auth" class="d-flex"></div>
-    </div>
-  </div>
-</nav>
 
-<section class="container py-5">
-  <div class="row hero align-items-center mb-5 gx-3 gx-md-5">
-    <div class="col-lg-7 col-12">
-      <h1 class="display-5 display-sm-6 fw-extrabold mb-3 text-dark" style="font-weight:800; line-height:1.2;">Better Living <br><span class="text-primary">Starts Here.</span></h1>
-      <p class="lead text-muted mb-4 fs-6 fs-md-5">Browse our curated collection of verified premium rental properties. Experience a seamless booking journey from tour to lease.</p>
-      <div id="btn-list-prop"></div>
-    </div>
-    <div class="col-lg-5 d-none d-lg-block">
-    </div>
-  </div>
+<body class="home">
+    <div id="hover-bg" aria-hidden="true"></div>
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="brand-home" aria-label="Home">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M4 10.5L12 4l8 6.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M6.5 9.5V20h11V9.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M10 20v-5h4v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </a>
+            <ul class="nav-list"></ul>
 
-  <div class="d-flex justify-content-between align-items-end mb-4 flex-column flex-md-row gap-3">
-    <div class="order-1 order-md-0"><h2 class="fw-bold mb-0">Featured Properties</h2><p class="text-muted small">Hand-picked listings for your consideration</p></div>
-    <div class="text-md-end order-0 order-md-1"><span class="badge bg-light text-dark shadow-sm px-3 py-2">Discover More</span></div>
-  </div>
-
-  <div id="properties-grid" class="row g-3 g-md-4 mb-5">
-    <!-- Loaded via JS -->
-    <div class="col-12 text-center py-5"><div class="spinner-border text-primary"></div></div>
-  </div>
-</section>
-
-<footer class="footer py-5">
-  <div class="container border-top pt-4">
-    <div class="row align-items-center">
-      <div class="col-md-6 text-md-start mb-3 mb-md-0"><span class="h5 fw-bold text-dark me-2">Rent a Home</span><p class="text-muted small mb-0">&copy; 2024 Premium Rental Management Systems.</p></div>
-      <div class="col-md-6 text-md-end"><a href="#" class="text-muted small text-decoration-none me-3">Privacy</a><a href="#" class="text-muted small text-decoration-none me-3">Terms</a><a href="#" class="text-muted small text-decoration-none">Support</a></div>
-    </div>
-  </div>
-</footer>
-
-<script type="module">
-import { initNavbar } from './js/app.js';
-import { fetchProperties } from './js/properties.js';
-import { isLandlord, refreshLocalUser } from './js/auth.js';
-
-// Initialize navbar immediately - this shows login button
-try {
-  initNavbar();
-  console.log('Navbar initialized');
-} catch(err) {
-  console.error('Error initializing navbar:', err);
-}
-
-// Load properties asynchronously
-(async ()=>{
-  try {
-    await refreshLocalUser();
-    console.log('User refreshed');
-    
-    if(isLandlord()){
-      document.getElementById('btn-list-prop').innerHTML = `<a href="add-property.html" class="btn btn-primary btn-lg shadow-sm px-5 py-3">List New Property</a>`;
-    }
-    
-    const propertiesGrid = document.getElementById('properties-grid');
-    console.log('Fetching properties...');
-    
-    const properties = await fetchProperties({});
-    console.log('Properties fetched:', properties.length);
-    
-    if(!properties || !properties.length){ 
-      propertiesGrid.innerHTML = '<div class="col-12 text-center py-5"><h5 class="text-muted">No premium listings found yet.</h5></div>'; 
-      return; 
-    }
-    
-    propertiesGrid.innerHTML = properties.map(p=>{
-      const img = (p.image_url) ? `<img src="${p.image_url}" class="card-img-top" alt="${p.title}">` : `<div class="no-image d-flex align-items-center justify-content-center"><h4>No image</h4></div>`;
-      return `
-      <div class="col-12 col-sm-6 col-lg-4">
-        <div class="card property-card h-100">
-          <div style="position:relative">
-            ${img}
-            <div style="position:absolute; right:12px; top:12px;"> <span class="price-badge">$${p.price}</span></div>
-          </div>
-          <div class="card-body d-flex flex-column">
-            <h5 class="card-title">${p.title}</h5>
-            <div class="small-muted mb-2">${p.city} • ${p.bedrooms} bed • ${p.bathrooms} bath</div>
-            <p class="card-text flex-grow-1">${(p.description||'').slice(0,120)}...</p>
-            <div class="mt-auto d-flex justify-content-between align-items-center gap-2 flex-wrap">
-              <div class="card-amenities">${(p.amenities||[]).slice(0,2).map(a=>`<span class="amenity-badge">${a}</span>`).join('')}</div>
-              <a href="property-details.html?id=${p.id}" class="btn btn-sm btn-primary flex-shrink-0">View</a>
+            <div class="mobile-menu" onclick="showMenu()">
+                <div class="line line1"></div>
+                <div class="line line2"></div>
+                <div class="line line3"></div>
             </div>
-          </div>
+            <div id="nav-auth"></div>
         </div>
-      </div>
-    `;
-      }).join('');
-    console.log('Properties rendered successfully');
-  } catch(err) { 
-    console.error('Error loading properties:', err); 
-    if(err.message) console.error('Error message:', err.message);
-    const propertiesGrid = document.getElementById('properties-grid');
-    propertiesGrid.innerHTML = `<div class="col-12"><div class="alert alert-info">Properties are loading. Please refresh if this persists.</div></div>`; 
-  }
-})();
-</script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </nav>
+
+    <section class="header" data-hover-bg="./images/banner1.png">
+        <div class="container">
+            <div class="header-info">
+                <h1 class="header-headline">your perfect home waiting for you </h1>
+                <p class="header-subtitle">
+                    we help you get your dream house with us.
+                    We are professional house consultant
+                </p>
+
+                <a href="#product" class="cta">Explore Now</a>
+            </div>
+        </div>
+    </section>
+        <section id="product">
+                <div id="properties-grid" class="container glass" data-hover-bg="./images/3.jpeg">
+                    <div class="col-12 text-center py-5"><div class="spinner-border"></div></div>
+                </div>
+        </section>
+
+        <footer id="footer" class="site-footer">
+            <div class="container py-3 text-center">
+                <h3 class="fw-bold mb-1">Rent a Home</h3>
+                <p class="small-muted mb-3">Connecting landlords and tenants with a modern, secure rental platform.</p>
+                <div class="student-grid mb-2">
+                    <div class="student-card">
+                        <strong>Reyan Abbas</strong>
+                        <span class="student-meta">Roll No: BSF2206491</span>
+                        <a class="email-widget" href="mailto:reyan97531@gmail.com" aria-label="Email Reyan Abbas">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 7.25C3 6.01 4.01 5 5.25 5h13.5C19.99 5 21 6.01 21 7.25v9.5C21 17.99 19.99 19 18.75 19H5.25C4.01 19 3 17.99 3 16.75v-9.5Z" stroke="currentColor" stroke-width="1.4"/><path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            <span>reyan97531@gmail.com</span>
+                        </a>
+                    </div>
+                    <div class="student-card">
+                        <strong>Tayyaba Fiaz</strong>
+                        <span class="student-meta">Roll No: BSF2206471</span>
+                        <a class="email-widget" href="mailto:tayyaba.fiaz03@gmail.com" aria-label="Email Tayyaba Fiaz">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 7.25C3 6.01 4.01 5 5.25 5h13.5C19.99 5 21 6.01 21 7.25v9.5C21 17.99 19.99 19 18.75 19H5.25C4.01 19 3 17.99 3 16.75v-9.5Z" stroke="currentColor" stroke-width="1.4"/><path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            <span>tayyaba.fiaz03@gmail.com</span>
+                        </a>
+                    </div>
+                    <div class="student-card">
+                        <strong>Haseeb Ullah</strong>
+                        <span class="student-meta">Roll No: BSF2206481</span>
+                        <a class="email-widget" href="mailto:haseebkhaliq0001@gmail.com" aria-label="Email Haseeb Ullah">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 7.25C3 6.01 4.01 5 5.25 5h13.5C19.99 5 21 6.01 21 7.25v9.5C21 17.99 19.99 19 18.75 19H5.25C4.01 19 3 17.99 3 16.75v-9.5Z" stroke="currentColor" stroke-width="1.4"/><path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            <span>haseebkhaliq0001@gmail.com</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="text-muted small mt-2">University Of Education, Multan Campus | &copy; 2026 Rent a Home</div>
+            </div>
+        </footer>
+
+        <!-- gsap link  -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js" integrity="sha512-VEBjfxWUOyzl0bAwh4gdLEaQyDYPvLrZql3pw1ifgb6fhEvZl9iDDehwHZ+dsMzA0Jfww8Xt7COSZuJ/slxc4Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+        <script type="module">
+        import { initNavbar } from './js/app.js';
+        import { fetchProperties } from './js/properties.js';
+        import { isLandlord, refreshLocalUser } from './js/auth.js';
+        import { supabase } from './js/supabaseClient.js';
+
+        initNavbar();
+        (async ()=>{
+            try{
+                await refreshLocalUser();
+                const grid = document.getElementById('properties-grid');
+                grid.innerHTML = '<div class="col-12 text-center py-5"><div class="spinner-border"></div></div>';
+                let properties = await fetchProperties({});
+                // show all fetched properties (no additional owner-role filtering)
+
+                if(!properties || !properties.length){
+                    grid.innerHTML = '<div class="col-12 text-center py-5"><h5 class="text-muted">No listings yet.</h5></div>';
+                    return;
+                }
+
+                grid.innerHTML = (properties||[]).map(p=>`
+                    <div class="product-card">
+                        <img src="${p.image_url || './images/placeholder.svg'}" alt="${p.title}" class="product-img">
+                        <div class="card-info">
+                            <div class="card-info-content"><img src="./images/location.svg" alt=""><p class="loaction-name">${p.city || ''}</p></div>
+                            <div class="card-info-content">
+                                <div class="content"><img src="./images/bed.svg" alt=""><p>${p.bedrooms||0} Bed</p></div>
+                                <div class="content"><img src="./images/area.svg" alt=""><p>${p.bathrooms||0} Bath</p></div>
+                                <div class="content"><p>${p.address || p.city || 'Location available'}</p></div>
+                            </div>
+                            <div class="price"><p>$${p.price}</p><a href="property-details.html?id=${p.id}" class="booking-btn">View</a></div>
+                        </div>
+                    </div>
+                `).join('');
+            }catch(err){ console.error('Error loading properties:', err); document.getElementById('properties-grid').innerHTML = '<div class="col-12 text-center py-5"><h5 class="text-danger">Failed to load properties</h5></div>'; }
+        })();
+        </script>
 </body>
+
 </html>

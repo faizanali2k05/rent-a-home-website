@@ -4,13 +4,34 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Your Dashboard - Rent a Home</title>
+  <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary"><div class="container"><a class="navbar-brand" href="index.html">Rent a Home</a><div id="nav-auth" class="ms-auto"></div></div></nav>
+<body class="dashboard-page">
+<div id="hover-bg" aria-hidden="true"></div>
+<nav class="navbar">
+  <div class="container">
+    <a href="index.html" class="brand-home" aria-label="Home">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M4 10.5L12 4l8 6.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M6.5 9.5V20h11V9.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M10 20v-5h4v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </a>
+    <ul class="nav-list">
+      <li><a href="index.html#footer" class="list-item">About Us</a></li>
+    </ul>
+    <div class="mobile-menu" onclick="showMenu()">
+      <div class="line line1"></div>
+      <div class="line line2"></div>
+      <div class="line line3"></div>
+    </div>
+    <div id="nav-auth"></div>
+  </div>
+</nav>
 
-<section class="container py-3 py-md-4">
+<section class="container glass py-3 py-md-4 mt-4" data-hover-bg="./images/4.jpeg">
   <div class="row g-3 g-md-4">
     <div class="col-12 col-lg-3">
       <div class="card p-3 p-md-4 shadow-sm border-0" style="position: static;">
@@ -80,7 +101,7 @@ async function handleBookingAction(id, status) {
         <div class="card h-100 shadow-sm border-0 bg-light">
           <div class="card-body p-3">
             <h6 class="fw-bold mb-1">${p.title}</h6>
-            <div class="small text-muted mb-3">${p.city} • Lease price: $${p.price}/mo • ${p.bedrooms} bed</div>
+            <div class="small text-muted mb-3">${p.city} | Lease price: $${p.price}/mo | ${p.bedrooms} bed</div>
             <div class="d-flex gap-2 flex-wrap">
               <a href="property-details.html?id=${p.id}" class="btn btn-sm btn-outline-primary flex-grow-1">View</a>
               <button class="btn btn-sm btn-outline-danger btn-delete-prop" data-id="${p.id}" data-title="${p.title}">Delete</button>
@@ -130,12 +151,12 @@ async function handleBookingAction(id, status) {
       <h4 class="fw-bold mb-4">Resident Dashboard</h4>
       <div class="row g-4">
         <div class="col-12">
-          <h5 class="fw-bold mb-3 small-muted">ACTIVE LEASES</h5>
+          <h5 class="fw-bold mb-3 text-white">ACTIVE LEASES</h5>
           <div id="bookings-list" class="mb-5"></div>
         </div>
         <div class="col-12">
-          <h5 class="fw-bold mb-3 small-muted">PAYMENT HISTORY</h5>
-          <div id="payments-history" class="card border shadow-sm p-3 bg-light">
+          <h5 class="fw-bold mb-3 text-white">PAYMENT HISTORY</h5>
+          <div id="payments-history" class="card border shadow-sm p-3 bg-light dashboard-surface">
             <div class="text-center text-muted py-3">No payments recorded yet.</div>
           </div>
         </div>
@@ -145,7 +166,7 @@ async function handleBookingAction(id, status) {
     const bDiv = document.getElementById('bookings-list');
     const payHistoryDiv = document.getElementById('payments-history');
     
-    if(!bookings.length) { bDiv.innerHTML = '<div class="p-5 text-center text-muted card shadow-none bg-light border-0"><h5>You haven\'t made any bookings yet.</h5></div>'; }
+    if(!bookings.length) { bDiv.innerHTML = '<div class="p-5 text-center text-muted card shadow-none bg-light border-0 dashboard-surface"><h5 class="text-white">You haven\'t made any bookings yet.</h5></div>'; }
     else {
       const propertiesCache = {};
       const bookingsWithProps = await Promise.all(bookings.map(async b => {
@@ -154,10 +175,10 @@ async function handleBookingAction(id, status) {
       }));
 
       bDiv.innerHTML = bookingsWithProps.map(b => `
-        <div class="card p-3 mb-3 border border-0 shadow-sm bg-light">
+        <div class="card p-3 mb-3 border border-0 shadow-sm bg-light dashboard-surface">
           <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
             <div>
-              <div class="fw-bold mb-1 text-dark">${b.property?.title || 'Property Info Loading...'}</div>
+              <div class="fw-bold mb-1 text-white">${b.property?.title || 'Property Info Loading...'}</div>
               <div class="mb-2">
                 <span class="badge ${b.status==='approved'?'bg-success':b.status==='rejected'?'bg-danger':'bg-warning'} status-badge">${b.status}</span>
                 ${b.is_paid ? '<span class="badge bg-primary status-badge ms-md-1">Lease Active</span>' : ''}
@@ -243,9 +264,9 @@ window.confirmPayment = async function() {
     <div class="modal-content border-0 shadow-lg px-2">
       <div class="modal-header border-0 pb-0"><h5 class="modal-title fw-bold">Rent Payment</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
       <div class="modal-body py-4">
-        <div class="bg-light p-3 rounded-4 mb-4">
+        <div class="bg-light p-3 rounded-4 mb-4 dashboard-surface">
           <div class="row align-items-center">
-            <div class="col-6"><p class="small text-muted mb-0 fw-bold">PROPERTY</p><div id="pay-property-title" class="small fw-bold text-dark"></div></div>
+            <div class="col-6"><p class="small text-muted mb-0 fw-bold">PROPERTY</p><div id="pay-property-title" class="small fw-bold text-white"></div></div>
             <div class="col-6 text-end"><p class="small text-muted mb-0 fw-bold">TOTAL DUE</p><div id="pay-amount" class="h5 fw-bold text-primary m-0"></div></div>
           </div>
         </div>
@@ -260,15 +281,21 @@ window.confirmPayment = async function() {
             <option value="April 2024">April 2024</option>
             <option value="May 2024">May 2024</option>
             <option value="June 2024">June 2024</option>
+            <option value="July 2024">July 2024</option>
+            <option value="August 2024">August 2024</option>
+            <option value="September 2024">September 2024</option>
+            <option value="October 2024">October 2024</option>
+            <option value="November 2024">November 2024</option>
+            <option value="December 2024">December 2024</option>
           </select>
         </div>
 
         <div class="mb-4 d-flex gap-2">
-           <div class="card flex-fill p-3 border-0 bg-light text-start shadow-none">
+           <div class="card flex-fill p-3 border-0 bg-light text-start shadow-none dashboard-surface">
               <label class="small text-muted mb-2 fw-bold">SAVED PAYMENT METHOD</label>
               <div class="d-flex align-items-center gap-2">
                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-                 <span class="text-muted small">VISA ending in 4242</span>
+                 <span class="text-white small">VISA ending in 4242</span>
               </div>
            </div>
         </div>
@@ -286,6 +313,40 @@ window.confirmPayment = async function() {
     </div>
   </div>
 </div>
+
+<footer id="footer" class="site-footer">
+  <div class="container py-3 text-center">
+    <h3 class="fw-bold mb-1">Rent a Home</h3>
+    <p class="small-muted mb-3">Connecting landlords and tenants with a modern, secure rental platform.</p>
+    <div class="student-grid mb-2">
+      <div class="student-card">
+        <strong>Reyan Abbas</strong>
+        <span class="student-meta">Roll No: BSF2206491</span>
+        <a class="email-widget" href="mailto:reyan97531@gmail.com" aria-label="Email Reyan Abbas">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 7.25C3 6.01 4.01 5 5.25 5h13.5C19.99 5 21 6.01 21 7.25v9.5C21 17.99 19.99 19 18.75 19H5.25C4.01 19 3 17.99 3 16.75v-9.5Z" stroke="currentColor" stroke-width="1.4"/><path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>reyan97531@gmail.com</span>
+        </a>
+      </div>
+      <div class="student-card">
+        <strong>Tayyaba Fiaz</strong>
+        <span class="student-meta">Roll No: BSF2206471</span>
+        <a class="email-widget" href="mailto:tayyaba.fiaz03@gmail.com" aria-label="Email Tayyaba Fiaz">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 7.25C3 6.01 4.01 5 5.25 5h13.5C19.99 5 21 6.01 21 7.25v9.5C21 17.99 19.99 19 18.75 19H5.25C4.01 19 3 17.99 3 16.75v-9.5Z" stroke="currentColor" stroke-width="1.4"/><path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>tayyaba.fiaz03@gmail.com</span>
+        </a>
+      </div>
+      <div class="student-card">
+        <strong>Haseeb Ullah</strong>
+        <span class="student-meta">Roll No: BSF2206481</span>
+        <a class="email-widget" href="mailto:haseebkhaliq0001@gmail.com" aria-label="Email Haseeb Ullah">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 7.25C3 6.01 4.01 5 5.25 5h13.5C19.99 5 21 6.01 21 7.25v9.5C21 17.99 19.99 19 18.75 19H5.25C4.01 19 3 17.99 3 16.75v-9.5Z" stroke="currentColor" stroke-width="1.4"/><path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>haseebkhaliq0001@gmail.com</span>
+        </a>
+      </div>
+    </div>
+    <div class="text-muted small mt-2">University Of Education, Multan Campus | &copy; 2026 Rent a Home</div>
+  </div>
+</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

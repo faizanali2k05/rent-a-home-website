@@ -39,20 +39,49 @@ export function generateInvoice(booking, property, type = 'INVOICE', month = nul
 export function initNavbar(){
   const user = getLocalUser();
   const navAuth = document.getElementById('nav-auth');
+  const navList = document.querySelector('.nav-list');
+  const menuButton = document.querySelector('.mobile-menu');
   if(!navAuth) return;
+  if (navList) navList.innerHTML = '';
   if(user){
     navAuth.innerHTML = `
-      <span class="me-3 d-none d-md-inline text-white-50">Signed in as <strong>${user.full_name || user.email}</strong></span>
-      <a href="dashboard.html" class="btn btn-sm btn-outline-light me-2">My Dashboard</a>
-      <button id="btn-logout" class="btn btn-sm btn-danger">Logout</button>
+      <a href="index.html#footer" class="nav-auth-link secondary">About Us</a>
+      <a href="dashboard.html" class="nav-auth-link primary">My Dashboard</a>
+      <button type="button" id="btn-logout" class="nav-auth-link secondary nav-auth-button">Logout</button>
     `;
-    document.getElementById('btn-logout')?.addEventListener('click', async ()=>{ await logout(); window.location.href = 'index.html';});
   }else{
     navAuth.innerHTML = `
-      <a href="login.html" class="btn btn-sm btn-outline-light me-2">Login</a>
-      <a href="register.html" class="btn btn-sm btn-light">Get Started</a>
+      <a href="index.html#footer" class="nav-auth-link secondary">About Us</a>
+      <a href="login.html" class="nav-auth-link secondary">Login</a>
+      <a href="register.html" class="nav-auth-link primary">Sign Up</a>
     `;
   }
+
+  const closeMenu = () => {
+    menuButton?.classList.remove('active');
+    navList?.classList.remove('active');
+    navAuth.classList.remove('active');
+    document.body.classList.remove('menu-open');
+  };
+
+  const toggleMenu = () => {
+    menuButton.classList.toggle('active');
+    navList?.classList.toggle('active');
+    navAuth.classList.toggle('active');
+    document.body.classList.toggle('menu-open');
+  };
+
+  document.querySelectorAll('.nav-list a, #nav-auth a').forEach(link => {
+    link.addEventListener('click', closeMenu);
+  });
+
+  document.getElementById('btn-logout')?.addEventListener('click', async () => {
+    await logout();
+    closeMenu();
+    window.location.href = 'index.html';
+  });
+
+  window.showMenu = toggleMenu;
 }
 
 export async function loadNotifications(containerId){
@@ -83,6 +112,46 @@ export function showError(container, message){
 
 // Run when pages load
 document.addEventListener('DOMContentLoaded', async ()=>{
-  initNavbar();
+  // Ensure we refresh local user information first, then render navbar
   await refreshLocalUser();
+  initNavbar();
 });
+
+/* --------- merged from appUI.js (UI helpers & slideshow) --------- */
+window.showMenu = window.showMenu || function showMenuFallback() {};
+
+
+if (window.gsap) {
+  const doAnim = (sel, opts) => { if (document.querySelectorAll(sel).length) gsap.from(sel, opts); };
+  doAnim('.navbar', { duration: 1, delay: 0.3, x: -40, opacity: 0, ease: 'expo.inOut' });
+  doAnim('.header-headline', { duration: 1.2, delay: 0.5, y: 80, opacity: 0, ease: 'expo.inOut' });
+  doAnim('.header-subtitle', { duration: 1.2, delay: 0.5, y: 20, opacity: 0, ease: 'expo.inOut' });
+  doAnim('.cta', { duration: 1.2, delay: 0.6, y: 20, opacity: 0, ease: 'expo.inOut' });
+  doAnim('form', { duration: 1.2, delay: 0.3, y: 80, opacity: 0, ease: 'expo.inOut' });
+  doAnim('.product-info', { duration: 1.2, delay: 0.5, x: -100, opacity: 0, ease: 'expo.inOut' });
+  // product cards may be added dynamically later; animate when present
+  const animateCards = () => {
+    const cards = document.querySelectorAll('.product-card');
+    if (cards.length) gsap.from(cards, { duration: 1.2, delay: 0.5, y: 200, opacity: 0, ease: 'expo.inOut', stagger: 0.08 });
+  };
+  animateCards();
+  // Also observe for dynamically added product cards
+  const grid = document.getElementById('properties-grid');
+  if (grid) {
+    const obs = new MutationObserver((muts) => { animateCards(); });
+    obs.observe(grid, { childList: true, subtree: true });
+  }
+}
+
+// Single background image for `#hover-bg`
+document.addEventListener('DOMContentLoaded', () => {
+  const bg = document.getElementById('hover-bg');
+  if (!bg) return;
+  const singleBackground = './images/1.jpeg';
+  bg.style.backgroundImage = `url('${singleBackground}')`;
+  bg.style.opacity = '0.78';
+  bg.style.transform = 'scale(1.02)';
+  bg.style.filter = 'brightness(0.5) saturate(1.06)';
+});
+
+/* --------- end merged content --------- */

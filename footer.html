@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>About Us - Rent a Home</title>
+    <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div id="hover-bg" aria-hidden="true"></div>
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="brand-home" aria-label="Home">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 10.5L12 4l8 6.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M6.5 9.5V20h11V9.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M10 20v-5h4v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+      <ul class="nav-list">
+        <li><a href="#footer" class="list-item">About Us</a></li>
+      </ul>
+      <div class="mobile-menu" onclick="showMenu()">
+        <div class="line line1"></div>
+        <div class="line line2"></div>
+        <div class="line line3"></div>
+      </div>
+      <div id="nav-auth"></div>
+    </div>
+  </nav>
+
+  <main class="container glass py-5 mt-4" data-hover-bg="./images/banner1.png">
+    <h1 class="fw-bold">About Rent a Home</h1>
+    <p class="small-muted mt-3">Rent a Home is a modern rental platform connecting landlords and tenants. We make listing, searching, booking, and managing properties simple and secure.</p>
+
+    <section class="mt-4">
+      <h3>Our Mission</h3>
+      <p>We aim to simplify the rental process by providing an intuitive platform that helps users find quality homes and enables landlords to manage listings easily.</p>
+    </section>
+
+    <section class="mt-4">
+      <h3>Tech & Security</h3>
+      <p>Built with HTML, CSS, JavaScript, and Supabase, we follow best practices for secure authentication and data access.</p>
+    </section>
+
+    <section class="mt-4">
+      <h3>Contact</h3>
+      <p>Email: support@rentahome.example | Phone: +1 555 123 4567</p>
+    </section>
+  </main>
+
+  <footer id="footer" class="site-footer">
+    <div class="container py-3 text-center">
+      <h3 class="fw-bold mb-1">Rent a Home</h3>
+      <p class="small-muted mb-3">Connecting landlords and tenants with a modern, secure rental platform.</p>
+      <div class="student-grid mb-2">
+        <div class="student-card">
+          <strong>Reyan Abbas</strong>
+          <span class="student-meta">Roll No: BSF2206491</span>
+          <a class="email-widget" href="mailto:reyan97531@gmail.com" aria-label="Email Reyan Abbas">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 7.25C3 6.01 4.01 5 5.25 5h13.5C19.99 5 21 6.01 21 7.25v9.5C21 17.99 19.99 19 18.75 19H5.25C4.01 19 3 17.99 3 16.75v-9.5Z" stroke="currentColor" stroke-width="1.4"/><path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>reyan97531@gmail.com</span>
+          </a>
+        </div>
+        <div class="student-card">
+          <strong>Tayyaba Fiaz</strong>
+          <span class="student-meta">Roll No: BSF2206471</span>
+          <a class="email-widget" href="mailto:tayyaba.fiaz03@gmail.com" aria-label="Email Tayyaba Fiaz">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 7.25C3 6.01 4.01 5 5.25 5h13.5C19.99 5 21 6.01 21 7.25v9.5C21 17.99 19.99 19 18.75 19H5.25C4.01 19 3 17.99 3 16.75v-9.5Z" stroke="currentColor" stroke-width="1.4"/><path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>tayyaba.fiaz03@gmail.com</span>
+          </a>
+        </div>
+        <div class="student-card">
+          <strong>Haseeb Ullah</strong>
+          <span class="student-meta">Roll No: BSF2206481</span>
+          <a class="email-widget" href="mailto:haseebkhaliq0001@gmail.com" aria-label="Email Haseeb Ullah">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 7.25C3 6.01 4.01 5 5.25 5h13.5C19.99 5 21 6.01 21 7.25v9.5C21 17.99 19.99 19 18.75 19H5.25C4.01 19 3 17.99 3 16.75v-9.5Z" stroke="currentColor" stroke-width="1.4"/><path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>haseebkhaliq0001@gmail.com</span>
+          </a>
+        </div>
+      </div>
+      <div class="text-muted small mt-2">University Of Education, Multan Campus | &copy; 2026 Rent a Home</div>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { initNavbar } from './js/app.js';
+    initNavbar();
+  </script>
+</body>
+</html>
