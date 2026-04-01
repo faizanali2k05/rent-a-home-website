@@ -47,15 +47,7 @@
           <div class="mb-3">
             <label class="form-label fw-500">Address</label>
             <input id="address" class="form-control" placeholder="123 Main Street, Apt 4B">
-            <small class="text-muted d-block mt-1">Provide a precise street address for the map preview.</small>
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-500">Google Maps Location</label>
-            <input id="mapLocation" class="form-control" placeholder="Enter full location for map preview">
-            <small class="text-muted d-block mt-1">Search a place or type a full address to preview it on the map.</small>
-          </div>
-          <div class="mb-4">
-            <div id="map-preview" class="rounded-4 overflow-hidden" style="min-height: 320px;"></div>
+            <small class="text-muted d-block mt-1">Add a complete street address to help users find this listing.</small>
           </div>
           <div class="row g-2 g-md-3">
             <div class="col-12 col-sm-4 mb-3">
@@ -129,7 +121,6 @@
 import { requireAuth, getLocalUser, refreshLocalUser } from './js/auth.js';
 import { addProperty } from './js/properties.js';
 import { initNavbar } from './js/app.js';
-import { loadGoogleMapsApi } from './js/maps.js';
 
 initNavbar();
 
@@ -137,54 +128,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await refreshLocalUser();
   const user = requireAuth('login.html');
   const msg = document.getElementById('msg');
-  const mapLocationInput = document.getElementById('mapLocation');
   const addressInput = document.getElementById('address');
-  const cityInput = document.getElementById('city');
-  const mapPreview = document.getElementById('map-preview');
-  let googleMap;
-  let googleMarker;
-  let autocomplete;
-
-  const renderMapForQuery = (query) => {
-    if (!window.google?.maps || !query || !googleMap || !googleMarker) return;
-    const geocoder = new google.maps.Geocoder();
-    geocoder.geocode({ address: query }, (results, status) => {
-      if (status !== 'OK' || !results?.[0]) return;
-      const location = results[0].geometry.location;
-      googleMap.setCenter(location);
-      googleMap.setZoom(15);
-      googleMarker.setPosition(location);
-    });
-  };
-
-  const updateMapPreview = () => {
-    const query = mapLocationInput.value.trim() || [addressInput.value.trim(), cityInput.value.trim()].filter(Boolean).join(', ');
-    renderMapForQuery(query || 'Pakistan');
-  };
-
-  const setupGoogleMap = () => {
-    if (!window.google?.maps || googleMap) return;
-    googleMap = new google.maps.Map(mapPreview, {
-      center: { lat: 30.1575, lng: 71.5249 },
-      zoom: 12,
-      styles: [{ featureType: 'all', elementType: 'geometry', stylers: [{ saturation: -10 }] }]
-    });
-    googleMarker = new google.maps.Marker({ map: googleMap });
-    autocomplete = new google.maps.places.Autocomplete(mapLocationInput, {
-      fields: ['formatted_address', 'geometry', 'name']
-    });
-    autocomplete.addListener('place_changed', () => {
-      const place = autocomplete.getPlace();
-      if (!place?.geometry?.location) return;
-      const address = place.formatted_address || place.name || mapLocationInput.value;
-      mapLocationInput.value = address;
-      if (!addressInput.value.trim()) addressInput.value = address;
-      googleMap.setCenter(place.geometry.location);
-      googleMap.setZoom(16);
-      googleMarker.setPosition(place.geometry.location);
-    });
-    updateMapPreview();
-  };
 
   if (user?.role !== 'landlord') {
     msg.innerHTML = '<div class="alert alert-danger">Only landlords can add properties.</div>';
@@ -192,25 +136,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  [mapLocationInput, addressInput, cityInput].forEach((input) => {
-    input.addEventListener('input', updateMapPreview);
-    input.addEventListener('blur', updateMapPreview);
-  });
-
-  try {
-    await loadGoogleMapsApi();
-    setupGoogleMap();
-  } catch (error) {
-    msg.innerHTML = '<div class="alert alert-warning">Google Maps could not be loaded. You can still save the address manually.</div>';
-  }
-
   document.getElementById('prop-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     msg.innerHTML = '<div class="alert alert-info">Saving property...</div>';
     try {
       const localUser = getLocalUser();
-      const mapLocation = mapLocationInput.value.trim();
-      const address = addressInput.value.trim() || mapLocation;
+      const address = addressInput.value.trim();
       await addProperty({
         owner: localUser?.id,
         title: document.getElementById('title').value,

@@ -73,6 +73,10 @@ async function handleBookingAction(id, status) {
 (async ()=>{
   await refreshLocalUser();
   const user = getLocalUser();
+  if(user.role === 'admin'){
+    window.location.href = 'admin-dashboard.html';
+    return;
+  }
   document.getElementById('profile-info').innerHTML = `
     <div class="text-primary small fw-bold mb-1">${user.role.toUpperCase()}</div>
     <strong class="h5">${user.full_name || user.email}</strong>

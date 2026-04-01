@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Dashboard - Rent a Home</title>
+  <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .admin-dashboard .reports-surface,
+    .admin-dashboard .listings-surface,
+    .admin-dashboard .analytics-surface,
+    .admin-dashboard .bg-light,
+    .admin-dashboard .table-responsive {
+      background: rgba(9, 16, 29, 0.58) !important;
+      color: var(--text) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    }
+    .admin-dashboard .table > :not(caption) > * > * {
+      background: rgba(9, 16, 29, 0.74) !important;
+      color: var(--text) !important;
+      border-bottom-color: rgba(255, 255, 255, 0.12) !important;
+      box-shadow: none !important;
+    }
+    .admin-dashboard .table thead th {
+      background: rgba(15, 23, 42, 0.88) !important;
+      color: #f8fafc !important;
+    }
+    .admin-dashboard input.form-control,
+    .admin-dashboard select.form-select,
+    .admin-dashboard textarea.form-control {
+      background: rgba(15, 23, 42, 0.8) !important;
+      color: #f8fafc !important;
+      border-color: rgba(255, 255, 255, 0.16) !important;
+    }
+    .admin-dashboard .table,
+    .admin-dashboard .table th,
+    .admin-dashboard .table td,
+    .admin-dashboard h4,
+    .admin-dashboard h5,
+    .admin-dashboard h6,
+    .admin-dashboard strong,
+    .admin-dashboard .small {
+      color: var(--text) !important;
+    }
+    .admin-dashboard .text-primary {
+      color: #93c5fd !important;
+    }
+  </style>
+</head>
+<body class="dashboard-page admin-dashboard">
+<div id="hover-bg" aria-hidden="true"></div>
+<nav class="navbar">
+  <div class="container">
+    <a href="index.html" class="brand-home" aria-label="Home">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M4 10.5L12 4l8 6.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M6.5 9.5V20h11V9.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M10 20v-5h4v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </a>
+    <ul class="nav-list"></ul>
+    <div class="mobile-menu" onclick="showMenu()">
+      <div class="line line1"></div>
+      <div class="line line2"></div>
+      <div class="line line3"></div>
+    </div>
+    <div id="nav-auth"></div>
+  </div>
+</nav>
+
+<section class="container glass py-3 py-md-4 mt-4" data-hover-bg="./images/4.jpeg">
+  <div class="row g-3 g-md-4">
+    <div class="col-12 col-lg-3">
+      <div class="card p-3 p-md-4 shadow-sm border-0">
+        <h5 class="fw-bold mb-3">Admin Panel</h5>
+        <div id="admin-profile" class="small mb-4">Loading...</div>
+        <div id="policy-warning" class="small"></div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-9">
+      <div class="card p-3 p-md-4 shadow-sm border-0 mb-3 analytics-surface">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+          <h4 class="fw-bold m-0">Overview Analytics</h4>
+          <button id="btn-refresh" class="btn btn-outline-primary btn-sm">Refresh Data</button>
+        </div>
+        <div id="analytics" class="row g-2"></div>
+      </div>
+
+      <div class="card p-3 p-md-4 shadow-sm border-0 mb-3 reports-surface">
+        <h5 class="fw-bold mb-3">Reports</h5>
+        <div id="reports"></div>
+      </div>
+
+      <div class="card p-3 p-md-4 shadow-sm border-0 mb-3">
+        <h5 class="fw-bold mb-3">Add Property (Admin)</h5>
+        <div id="create-msg"></div>
+        <form id="admin-add-form">
+          <div class="row g-2">
+            <div class="col-md-6"><input id="new-title" class="form-control" placeholder="Title" required></div>
+            <div class="col-md-6"><input id="new-city" class="form-control" placeholder="City" required></div>
+            <div class="col-md-8"><input id="new-address" class="form-control" placeholder="Address"></div>
+            <div class="col-md-4"><input id="new-price" type="number" class="form-control" placeholder="Monthly Price" required></div>
+            <div class="col-md-6"><input id="new-bedrooms" type="number" class="form-control" placeholder="Bedrooms" value="1"></div>
+            <div class="col-md-6"><input id="new-bathrooms" type="number" class="form-control" placeholder="Bathrooms" value="1"></div>
+            <div class="col-12"><textarea id="new-description" class="form-control" rows="2" placeholder="Description"></textarea></div>
+            <div class="col-12"><input id="new-image" class="form-control" placeholder="Image URL"></div>
+            <div class="col-12"><button class="btn btn-primary">Create Listing</button></div>
+          </div>
+        </form>
+      </div>
+
+      <div class="card p-3 p-md-4 shadow-sm border-0 listings-surface">
+        <h5 class="fw-bold mb-3">Manage Listings (All Landlords)</h5>
+        <div id="listing-msg"></div>
+        <div class="table-responsive">
+          <table class="table table-sm align-middle">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>City</th>
+                <th>Price</th>
+                <th>Available</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="listing-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script type="module">
+import { requireAuth, getLocalUser, refreshLocalUser } from './js/auth.js';
+import { initNavbar } from './js/app.js';
+import { loadAdminOverviewData, createAdminListing, updateAdminListing, deleteAdminListing, subscribeToAdminRealtime } from './js/admin.js';
+
+initNavbar();
+let disposeRealtime = null;
+let realtimeReloadTimer = null;
+
+function renderAnalytics(analytics){
+  const cards = [
+    ['Total Listings', analytics.totalListings],
+    ['Available Listings', analytics.availableListings],
+    ['Total Bookings', analytics.totalBookings],
+    ['Approved Bookings', analytics.approvedBookings],
+    ['Pending Bookings', analytics.pendingBookings],
+    ['Total Revenue', `$${analytics.totalRevenue.toFixed(2)}`],
+    ['Total Users', analytics.totalUsers],
+    ['Landlords', analytics.landlords],
+    ['Tenants', analytics.tenants]
+  ];
+  document.getElementById('analytics').innerHTML = cards.map(([label, value]) => `
+    <div class="col-6 col-md-4">
+      <div class="p-3 rounded bg-light h-100">
+        <div class="small text-muted">${label}</div>
+        <div class="fw-bold">${value}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderReports(reports){
+  const breakdown = reports.bookingStatusBreakdown.map((b) => `<li class="small">${b.label}: <strong>${b.value}</strong></li>`).join('');
+  const latestBookingRows = reports.latestBookings.length
+    ? reports.latestBookings.map((b) => `<tr><td class="small">${b.id.slice(0, 8)}</td><td class="small">${b.status}</td><td class="small">${new Date(b.created_at).toLocaleDateString()}</td></tr>`).join('')
+    : '<tr><td colspan="3" class="small text-muted">No bookings visible.</td></tr>';
+
+  const latestPaymentRows = reports.latestPayments.length
+    ? reports.latestPayments.map((p) => `<tr><td class="small">${p.id.slice(0, 8)}</td><td class="small">$${Number(p.amount || 0).toFixed(2)}</td><td class="small">${p.month || '-'}</td></tr>`).join('')
+    : '<tr><td colspan="3" class="small text-muted">No payments visible.</td></tr>';
+
+  document.getElementById('reports').innerHTML = `
+    <div class="row g-3">
+      <div class="col-md-4">
+        <div class="bg-light rounded p-3 h-100">
+          <h6 class="fw-bold">Booking Status</h6>
+          <ul class="mb-0 ps-3">${breakdown}</ul>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="bg-light rounded p-3 h-100">
+          <h6 class="fw-bold">Recent Bookings</h6>
+          <div class="table-responsive"><table class="table table-sm mb-0"><tbody>${latestBookingRows}</tbody></table></div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="bg-light rounded p-3 h-100">
+          <h6 class="fw-bold">Recent Payments</h6>
+          <div class="table-responsive"><table class="table table-sm mb-0"><tbody>${latestPaymentRows}</tbody></table></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderListingTable(properties){
+  const table = document.getElementById('listing-table');
+  if(!properties.length){
+    table.innerHTML = '<tr><td colspan="5" class="text-muted small">No listings found.</td></tr>';
+    return;
+  }
+
+  table.innerHTML = properties.map((p) => `
+    <tr>
+      <td><input class="form-control form-control-sm edit-title" data-id="${p.id}" value="${(p.title || '').replaceAll('"', '&quot;')}"></td>
+      <td><input class="form-control form-control-sm edit-city" data-id="${p.id}" value="${(p.city || '').replaceAll('"', '&quot;')}"></td>
+      <td><input type="number" class="form-control form-control-sm edit-price" data-id="${p.id}" value="${Number(p.price || 0)}"></td>
+      <td>
+        <select class="form-select form-select-sm edit-availability" data-id="${p.id}">
+          <option value="true" ${p.availability !== false ? 'selected' : ''}>Yes</option>
+          <option value="false" ${p.availability === false ? 'selected' : ''}>No</option>
+        </select>
+      </td>
+      <td>
+        <div class="d-flex gap-2">
+          <button class="btn btn-sm btn-primary btn-save" data-id="${p.id}">Save</button>
+          <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${p.id}">Delete</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  document.querySelectorAll('.btn-save').forEach((btn) => {
+    btn.onclick = async () => {
+      const id = btn.dataset.id;
+      const updates = {
+        title: document.querySelector(`.edit-title[data-id="${id}"]`).value.trim(),
+        city: document.querySelector(`.edit-city[data-id="${id}"]`).value.trim(),
+        price: Number(document.querySelector(`.edit-price[data-id="${id}"]`).value || 0),
+        availability: document.querySelector(`.edit-availability[data-id="${id}"]`).value === 'true'
+      };
+      const listingMsg = document.getElementById('listing-msg');
+      listingMsg.innerHTML = '<div class="alert alert-info py-2 small">Saving listing...</div>';
+      try {
+        await updateAdminListing(id, updates);
+        listingMsg.innerHTML = '<div class="alert alert-success py-2 small">Listing updated.</div>';
+        await loadPage();
+      } catch (err) {
+        listingMsg.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+      }
+    };
+  });
+
+  document.querySelectorAll('.btn-delete').forEach((btn) => {
+    btn.onclick = async () => {
+      const id = btn.dataset.id;
+      if(!confirm('Delete this listing permanently?')) return;
+      const listingMsg = document.getElementById('listing-msg');
+      listingMsg.innerHTML = '<div class="alert alert-info py-2 small">Deleting listing...</div>';
+      try {
+        await deleteAdminListing(id);
+        listingMsg.innerHTML = '<div class="alert alert-success py-2 small">Listing deleted.</div>';
+        await loadPage();
+      } catch (err) {
+        listingMsg.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+      }
+    };
+  });
+}
+
+async function loadPage(){
+  const { analytics, reports, properties, errors } = await loadAdminOverviewData();
+  renderAnalytics(analytics);
+  renderReports(reports);
+  renderListingTable(properties);
+
+  const warning = document.getElementById('policy-warning');
+  if(errors.length){
+    warning.innerHTML = `<div class="alert alert-warning py-2 small mb-0">Some admin reports are restricted by DB policies: ${errors.join(' | ')}</div>`;
+  } else {
+    warning.innerHTML = '<div class="alert alert-success py-2 small mb-0">Admin access is active for analytics and reports.</div>';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await refreshLocalUser();
+  const user = requireAuth('login.html');
+  if(user.role !== 'admin'){
+    window.location.href = 'dashboard.html';
+    return;
+  }
+
+  document.getElementById('admin-profile').innerHTML = `
+    <div class="text-primary small fw-bold mb-1">ADMIN</div>
+    <strong class="h6">${user.full_name || user.email}</strong>
+    <div class="small text-muted">${user.email}</div>
+  `;
+
+  await loadPage();
+  document.getElementById('btn-refresh').onclick = loadPage;
+  disposeRealtime = subscribeToAdminRealtime(() => {
+    if (realtimeReloadTimer) clearTimeout(realtimeReloadTimer);
+    realtimeReloadTimer = setTimeout(() => {
+      loadPage();
+    }, 250);
+  });
+
+  document.getElementById('admin-add-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = document.getElementById('create-msg');
+    msg.innerHTML = '<div class="alert alert-info py-2 small">Creating listing...</div>';
+    try {
+      await createAdminListing(getLocalUser().id, {
+        title: document.getElementById('new-title').value.trim(),
+        city: document.getElementById('new-city').value.trim(),
+        address: document.getElementById('new-address').value.trim(),
+        price: Number(document.getElementById('new-price').value || 0),
+        bedrooms: Number(document.getElementById('new-bedrooms').value || 0),
+        bathrooms: Number(document.getElementById('new-bathrooms').value || 0),
+        description: document.getElementById('new-description').value.trim(),
+        amenities: [],
+        imageUrl: document.getElementById('new-image').value.trim()
+      });
+      msg.innerHTML = '<div class="alert alert-success py-2 small">Listing created successfully.</div>';
+      document.getElementById('admin-add-form').reset();
+      await loadPage();
+    } catch (err) {
+      msg.innerHTML = `<div class="alert alert-danger py-2 small">${err.message}</div>`;
+    }
+  });
+});
+
+window.addEventListener('beforeunload', () => {
+  if (disposeRealtime) disposeRealtime();
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

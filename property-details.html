@@ -37,32 +37,11 @@
   import { getLocalUser } from './js/auth.js';
   import { createBooking, fetchBookingsForUser } from './js/bookings.js';
   import { fetchReviews, addReview } from './js/reviews.js';
-  import { loadGoogleMapsApi } from './js/maps.js';
 
   initNavbar();
   const params = new URLSearchParams(location.search);
   const id = params.get('id');
   const content = document.getElementById('content');
-
-  function mountPropertyMap(mapQuery) {
-    if (!mapQuery || !window.google?.maps) return;
-    const mapEl = document.getElementById('property-map');
-    if (!mapEl || mapEl.dataset.ready === 'true') return;
-    mapEl.dataset.ready = 'true';
-    const geocoder = new google.maps.Geocoder();
-    const propertyMap = new google.maps.Map(mapEl, {
-      center: { lat: 30.1575, lng: 71.5249 },
-      zoom: 13
-    });
-    const marker = new google.maps.Marker({ map: propertyMap });
-    geocoder.geocode({ address: mapQuery }, (results, status) => {
-      if (status !== 'OK' || !results?.[0]) return;
-      const location = results[0].geometry.location;
-      propertyMap.setCenter(location);
-      propertyMap.setZoom(15);
-      marker.setPosition(location);
-    });
-  }
   async function renderReviews() {
     const list = document.getElementById('reviews-list');
     if (!list) return;
@@ -113,10 +92,7 @@
         ? `<img src="${mainImg}" class="img-fluid rounded-3 mb-3 w-100" style="height:300px; object-fit:cover;" alt="Property">`
         : `<div class="no-image d-flex align-items-center justify-content-center mb-3" style="height:300px;"><h3>No image available</h3></div>`;
 
-      const mapQuery = [p.address, p.city].filter(Boolean).join(', ');
-      const mapEmbed = mapQuery
-        ? `<div id="property-map" class="rounded-4 overflow-hidden mt-3" style="min-height: 320px;"></div>`
-        : '<div class="small text-muted">Map is unavailable until the owner adds a valid address.</div>';
+      const locationDescription = [p.address, p.city].filter(Boolean).join(', ');
 
       content.innerHTML = `
         <div class="row g-3 g-md-4">
@@ -135,8 +111,8 @@
 
             <div class="mb-4">
               <h5 class="fw-bold mb-3">Location</h5>
-              <div class="small text-muted mb-2">${p.address || 'Address not provided'}</div>
-              ${mapEmbed}
+              <div class="small text-muted mb-2">${locationDescription || 'Address not provided'}</div>
+              <div class="alert alert-secondary mb-0 py-2 small">Map preview is not available in this version.</div>
             </div>
             <hr class="my-4">
             <h5 class="fw-bold mb-3">Reviews</h5>
@@ -206,15 +182,6 @@
       `;
 
       await renderReviews();
-      if (mapQuery) {
-        try {
-          await loadGoogleMapsApi();
-          mountPropertyMap(mapQuery);
-        } catch (error) {
-          console.error('Google Maps failed to load:', error);
-        }
-      }
-
       if (residentBooking) {
         document.getElementById('btn-invoice').onclick = () => generateInvoice(residentBooking, p);
       }

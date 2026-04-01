@@ -235,6 +235,20 @@ CREATE INDEX IF NOT EXISTS idx_bookings_updated_at ON bookings(updated_at DESC);
 CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);
 CREATE INDEX IF NOT EXISTS idx_profiles_updated_at ON profiles(updated_at DESC);
 
+-- Helper function to check if current user is admin (used in RLS policies)
+CREATE OR REPLACE FUNCTION is_admin(uid uuid)
+RETURNS boolean
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM profiles
+    WHERE id = uid AND role = 'admin'
+  );
+$$;
+
 -- ROW LEVEL SECURITY: enable RLS on tables
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE properties ENABLE ROW LEVEL SECURITY;
@@ -248,6 +262,10 @@ CREATE POLICY "profiles_insert_own" ON profiles FOR INSERT WITH CHECK (auth.uid(
 
 DROP POLICY IF EXISTS "profiles_select_own" ON profiles;
 CREATE POLICY "profiles_select_own" ON profiles FOR SELECT USING (auth.uid() = id);
+
+DROP POLICY IF EXISTS "profiles_select_admin" ON profiles;
+CREATE POLICY "profiles_select_admin" ON profiles FOR SELECT
+USING (is_admin(auth.uid()));
 
 DROP POLICY IF EXISTS "profiles_update_own" ON profiles;
 CREATE POLICY "profiles_update_own" ON profiles FOR UPDATE USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
@@ -269,6 +287,11 @@ CREATE POLICY "properties_update_owner" ON properties FOR UPDATE USING (owner = 
 DROP POLICY IF EXISTS "properties_delete_owner" ON properties;
 CREATE POLICY "properties_delete_owner" ON properties FOR DELETE USING (owner = auth.uid());
 
+DROP POLICY IF EXISTS "properties_admin_manage" ON properties;
+CREATE POLICY "properties_admin_manage" ON properties FOR ALL
+USING (is_admin(auth.uid()))
+WITH CHECK (is_admin(auth.uid()));
+
 -- Policies: bookings
 DROP POLICY IF EXISTS "bookings_insert_tenant" ON bookings;
 CREATE POLICY "bookings_insert_tenant" ON bookings FOR INSERT WITH CHECK (auth.uid() = tenant_id);
@@ -281,6 +304,10 @@ CREATE POLICY "bookings_update_landlord" ON bookings FOR UPDATE USING (auth.uid(
 
 DROP POLICY IF EXISTS "bookings_delete_landlord" ON bookings;
 CREATE POLICY "bookings_delete_landlord" ON bookings FOR DELETE USING (auth.uid() IN (select owner from properties where id = property_id) OR auth.uid() = tenant_id);
+
+DROP POLICY IF EXISTS "bookings_admin_select" ON bookings;
+CREATE POLICY "bookings_admin_select" ON bookings FOR SELECT
+USING (is_admin(auth.uid()));
 
 -- Policies: reviews
 DROP POLICY IF EXISTS "reviews_insert_tenant" ON reviews;
@@ -304,5 +331,43 @@ CREATE POLICY "payments_insert_tenant" ON payments FOR INSERT WITH CHECK (auth.u
 
 DROP POLICY IF EXISTS "payments_select" ON payments;
 CREATE POLICY "payments_select" ON payments FOR SELECT USING (auth.uid() = tenant_id OR auth.uid() IN (SELECT owner FROM properties p JOIN bookings b ON b.property_id = p.id WHERE b.id = booking_id));
+
+DROP POLICY IF EXISTS "payments_admin_select" ON payments;
+CREATE POLICY "payments_admin_select" ON payments FOR SELECT
+USING (is_admin(auth.uid()));
+
+-- Realtime publication for admin dashboard live updates
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime'
+      AND schemaname = 'public'
+      AND tablename = 'properties'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE properties;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime'
+      AND schemaname = 'public'
+      AND tablename = 'bookings'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE bookings;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime'
+      AND schemaname = 'public'
+      AND tablename = 'payments'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE payments;
+  END IF;
+END $$;
 
 -- End of schema

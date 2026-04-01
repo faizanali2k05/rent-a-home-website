@@ -44,9 +44,11 @@ export function initNavbar(){
   if(!navAuth) return;
   if (navList) navList.innerHTML = '';
   if(user){
+    const dashboardHref = user.role === 'admin' ? 'admin-dashboard.html' : 'dashboard.html';
+    const dashboardLabel = user.role === 'admin' ? 'Admin Dashboard' : 'My Dashboard';
     navAuth.innerHTML = `
       <a href="index.html#footer" class="nav-auth-link secondary">About Us</a>
-      <a href="dashboard.html" class="nav-auth-link primary">My Dashboard</a>
+      <a href="${dashboardHref}" class="nav-auth-link primary">${dashboardLabel}</a>
       <button type="button" id="btn-logout" class="nav-auth-link secondary nav-auth-button">Logout</button>
     `;
   }else{
