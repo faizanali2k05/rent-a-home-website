@@ -1,10 +1,20 @@
 import { supabase } from './supabaseClient.js';
 
-const ADMIN_EMAIL = 'admin@mail.com';
-const ADMIN_PASSWORD = 'admin123';
+const ADMIN_CREDENTIALS = [
+  { email: 'admin@mail.com', password: 'admin123', name: 'System Admin' },
+  { email: 'reyan97531@gmail.com', password: 'BSF2206491', name: 'Reyan Abbas' },
+  { email: 'tayyaba.fiaz03@gmail.com', password: 'BSF2206471', name: 'Tayyaba Fiaz' },
+  { email: 'haseebkhaliq0001@gmail.com', password: 'BSF2206481', name: 'Haseeb Ullah' }
+];
+
+function getAdminMatch(email, password) {
+  const e = String(email || '').trim().toLowerCase();
+  const p = String(password || '');
+  return ADMIN_CREDENTIALS.find(c => c.email === e && c.password === p);
+}
 
 function isAdminCredentialPair(email, password){
-  return String(email || '').trim().toLowerCase() === ADMIN_EMAIL && String(password || '') === ADMIN_PASSWORD;
+  return !!getAdminMatch(email, password);
 }
 
 // Register a new user and create profile row
@@ -55,9 +65,10 @@ export async function login({email, password}){
   // Auto-bootstrap admin profile when logging in with fixed admin credentials.
   if(wantsAdmin){
     if(!profileData){
+      const adminMatch = getAdminMatch(email, password);
       const adminProfile = {
         id: user.id,
-        full_name: 'System Admin',
+        full_name: adminMatch ? adminMatch.name : 'System Admin',
         phone: '',
         role: 'admin'
       };
@@ -100,7 +111,7 @@ export async function refreshLocalUser(){
   // Refresh role from profiles table
   const u = getLocalUser();
   if(!u) return null;
-  if(u?.role === 'admin' && u?.email?.toLowerCase() === ADMIN_EMAIL) return u;
+  if(u?.role === 'admin' && ADMIN_CREDENTIALS.find(c => c.email === u?.email?.toLowerCase())) return u;
   const { data, error } = await supabase.from('profiles').select('role,full_name').eq('id', u.id).single();
   if(!error && data){
     u.role = data.role;
